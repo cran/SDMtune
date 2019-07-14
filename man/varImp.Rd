@@ -7,7 +7,7 @@
 varImp(model, permut = 10)
 }
 \arguments{
-\item{model}{\linkS4class{SDMmodel} object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
 \item{permut}{integer. Number of permutations, default is 10.}
 }
@@ -24,8 +24,11 @@ than one permutation (default is 10) the average of the decrease in training
 AUC is computed.
 }
 \details{
-Note that it could return values slightly different from MaxEnt java
+Note that it could return values slightly different from MaxEnt Java
 software due to a different random permutation.
+
+For \code{\link{SDMmodelCV}} objects the function returns the average and the
+standard deviation of the permutation importances of the single models.
 }
 \examples{
 \donttest{

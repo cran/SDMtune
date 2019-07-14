@@ -1,15 +1,15 @@
 Package: SDMtune
 Type: Package
 Title: Species Distribution Model Selection
-Version: 0.1.0
-Date: 2019-06-20
+Version: 0.1.1
+Date: 2019-07-14
 Authors@R: c(
 	  person("Sergio", "Vignali",  email = "sergio.vignali@iee.unibe.ch",
-	         role = c("aut", "cre"), comment = c(ORCID = "00000-0002-3390-5442")),
+	         role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3390-5442")),
 	  person("Arnaud", "Barras", role = "aut",
 	         comment = c(ORCID = "0000-0003-0850-6965")),
 	  person("Veronika", "Braunisch", role = "aut",
-	         comment = c(ORCID = "00000-0001-7035-4662")),
+	         comment = c(ORCID = "0000-0001-7035-4662")),
 	  person("Conservation Biology - University of Bern", role = "fnd")
 	)
 Description: User-friendly framework that enables the training and the
@@ -34,9 +34,8 @@ Imports: cli (>= 1.1.0), crayon (>= 1.3.4), dismo (>= 1.1-4), ggplot2
         (>= 3.2.0), htmltools (>= 0.3.6), jsonlite (>= 1.6), kableExtra
         (>= 1.1.0), maxnet (>= 0.1.2), methods, progress (>= 1.2.2),
         raster (>= 2.9-5), rasterVis (>= 0.45), Rcpp (>= 1.0.1),
-        reshape2 (>= 1.4.3), rgdal (>= 1.4-4), rJava (>= 0.9-11),
-        rstudioapi (>= 0.10), scales (>= 1.0.0), stringr (>= 1.4.0),
-        whisker (>= 0.3-2)
+        reshape2 (>= 1.4.3), rstudioapi (>= 0.10), scales (>= 1.0.0),
+        stringr (>= 1.4.0), whisker (>= 0.3-2)
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
@@ -58,11 +57,11 @@ Collate: 'Maxent_class.R' 'Maxnet_class.R' 'RcppExports.R'
         'trainMaxent.R' 'trainMaxnet.R' 'trainValTest.R' 'tss.R'
         'utils.R' 'varImp.R' 'varSel.R' 'zzz.R'
 NeedsCompilation: yes
-Packaged: 2019-06-20 07:08:49 UTC; vignali
-Author: Sergio Vignali [aut, cre] (<https://orcid.org/00000-0002-3390-5442>),
+Packaged: 2019-07-14 17:20:21 UTC; sergio
+Author: Sergio Vignali [aut, cre] (<https://orcid.org/0000-0002-3390-5442>),
   Arnaud Barras [aut] (<https://orcid.org/0000-0003-0850-6965>),
-  Veronika Braunisch [aut] (<https://orcid.org/00000-0001-7035-4662>),
+  Veronika Braunisch [aut] (<https://orcid.org/0000-0001-7035-4662>),
   Conservation Biology - University of Bern [fnd]
 Maintainer: Sergio Vignali <sergio.vignali@iee.unibe.ch>
 Repository: CRAN
-Date/Publication: 2019-06-21 08:00:20 UTC
+Date/Publication: 2019-07-14 22:02:42 UTC
