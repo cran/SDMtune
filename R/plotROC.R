@@ -2,14 +2,16 @@
 #'
 #' Plot the ROC curve of the given model and print the AUC value.
 #'
-#' @param model \link{SDMmodel} object.
-#' @param val \link{SWD} object. The validation dataset, default is NULL.
-#' @param test \link{SWD} object. The testing dataset, default is NULL.
+#' @param model \code{\link{SDMmodel}} object.
+#' @param test \code{\link{SWD}} object. The testing dataset, default is
+#' \code{NULL}.
+#' @param val deprecated.
 #'
 #' @return The plot object.
 #' @export
-#' @importFrom ggplot2 ggplot aes_ geom_line scale_colour_discrete geom_segment
-#' labs coord_fixed theme_minimal theme
+#' @importFrom ggplot2 ggplot aes_ geom_segment labs coord_fixed theme_minimal
+#' theme scale_color_discrete guides guide_legend
+#' @importFrom plotROC geom_roc
 #'
 #' @examples
 #' \donttest{
@@ -18,25 +20,21 @@
 #'                     pattern = "grd", full.names = TRUE)
 #' predictors <- raster::stack(files)
 #'
-#' # Prepare presence locations
-#' p_coords <- condor[, 1:2]
-#'
-#' # Prepare background locations
-#' bg_coords <- dismo::randomPoints(predictors, 5000)
+#' # Prepare presence and background locations
+#' p_coords <- virtualSp$presence
+#' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-#'                        env = predictors, categorical = "biome")
-#' bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-#'                  env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+#'                    env = predictors, categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(presence, test = 0.2)
+#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", p = train, a = bg, fc = "l")
+#' model <- train(method = "Maxnet", data = train, fc = "l")
 #'
 #' # Plot the training ROC curve
 #' plotROC(model)
@@ -46,45 +44,48 @@
 #' }
 #'
 #' @author Sergio Vignali
-plotROC <- function(model, val = NULL, test = NULL) {
+plotROC <- function(model, test = NULL, val = NULL) {
 
-  cm <- confMatrix(model)
-  fpr <- cm$fp / (cm$fp + cm$tn)
-  tpr <- cm$tp / (cm$tp + cm$fn)
-  auc <- auc(model)
-  df <- data.frame(set = "train", fpr = fpr, tpr = tpr,
-                   stringsAsFactors = FALSE)
-  labels <- c(paste("Train", round(auc, 3)))
-
+  # TODO Remove it next release
   if (!is.null(val)) {
-    cm <- confMatrix(model, test = val)
-    fpr <- cm$fp / (cm$fp + cm$tn)
-    tpr <- cm$tp / (cm$tp + cm$fn)
-    auc <- auc(model, test = val)
-    df_val <- data.frame(set = "val", fpr = fpr, tpr = tpr)
-    df <- rbind(df, df_val)
-    labels <- append(labels, paste("Val", round(auc, 3)))
+    stop("\"val\" argument is deprecated and will be removed in the next ",
+         "release.", call. = FALSE)
   }
+
+  if (class(model@model) == "Maxent") {
+    type <- "raw"
+  } else {
+    type <- "link"
+  }
+
+  df <- data.frame(set = "Train", pa = model@data@pa,
+                   pred = predict(model, data = model@data, type = type),
+                   stringsAsFactors = FALSE)
+  auc <- auc(model)
+  labels <- paste("Train", round(auc, 3))
 
   if (!is.null(test)) {
-    cm <- confMatrix(model, test = test)
-    fpr <- cm$fp / (cm$fp + cm$tn)
-    tpr <- cm$tp / (cm$tp + cm$fn)
-    auc <- auc(model, test = test)
-    df_test <- data.frame(set = "test", fpr = fpr, tpr = tpr)
+    df_test <- data.frame(set = "Test", pa = test@pa,
+                          pred = predict(model, data = test, type = type),
+                          stringsAsFactors = FALSE)
     df <- rbind(df, df_test)
-    labels <- append(labels, paste("Test", round(auc, 3)))
+    auc <- auc(model, test = test)
+    labels <- c(paste("Test", round(auc, 3)), labels)
   }
 
-  my_plot <- ggplot(df, aes_(x = ~fpr, y = ~tpr, colour = ~set)) +
-    geom_line() +
-    scale_colour_discrete(name = "AUC", labels = labels) +
+  my_plot <- ggplot(df, aes_(m = ~pred, d = ~pa, group = ~set)) +
+    geom_roc(n.cuts = 0, aes_(color = ~set), size = 0.5) +
+    scale_color_discrete(name = "AUC", labels = labels) +
     geom_segment(aes_(x = 0, y = 0, xend = 1, yend = 1), color = "grey",
                  linetype = 2) +
     labs(x = "False Positive Rate", y = "True Positive Rate") +
     coord_fixed() +
     theme_minimal() +
     theme(text = element_text(colour = "#666666", family = "sans-serif"))
+
+  if (!is.null(test)) {
+    my_plot <- my_plot + guides(colour = guide_legend(reverse = TRUE))
+  }
 
   return(my_plot)
 }

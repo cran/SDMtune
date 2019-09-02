@@ -4,14 +4,15 @@
 \alias{plotROC}
 \title{Plot ROC curve}
 \usage{
-plotROC(model, val = NULL, test = NULL)
+plotROC(model, test = NULL, val = NULL)
 }
 \arguments{
-\item{model}{\link{SDMmodel} object.}
+\item{model}{\code{\link{SDMmodel}} object.}
 
-\item{val}{\link{SWD} object. The validation dataset, default is NULL.}
+\item{test}{\code{\link{SWD}} object. The testing dataset, default is
+\code{NULL}.}
 
-\item{test}{\link{SWD} object. The testing dataset, default is NULL.}
+\item{val}{deprecated.}
 }
 \value{
 The plot object.
@@ -26,25 +27,21 @@ files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
                     pattern = "grd", full.names = TRUE)
 predictors <- raster::stack(files)
 
-# Prepare presence locations
-p_coords <- condor[, 1:2]
-
-# Prepare background locations
-bg_coords <- dismo::randomPoints(predictors, 5000)
+# Prepare presence and background locations
+p_coords <- virtualSp$presence
+bg_coords <- virtualSp$background
 
 # Create SWD object
-presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-                       env = predictors, categorical = "biome")
-bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-                 env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+                   env = predictors, categorical = "biome")
 
 # Split presence locations in training (80\%) and testing (20\%) datasets
-datasets <- trainValTest(presence, test = 0.2)
+datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
 train <- datasets[[1]]
 test <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxnet", p = train, a = bg, fc = "l")
+model <- train(method = "Maxnet", data = train, fc = "l")
 
 # Plot the training ROC curve
 plotROC(model)

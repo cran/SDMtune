@@ -2,15 +2,18 @@
 #'
 #' Make a report that shows the main results.
 #'
-#' @param model \linkS4class{SDMmodel} object.
-#' @param type character. Output type, see \code{\link{predict,SDMmodel-method}}
-#' for more details.
+#' @param model \code{\linkS4class{SDMmodel}} object.
 #' @param folder character. The name of the folder in which to save the output.
 #' The folder is created in the working directory.
-#' @param test \linkS4class{SWD} object with the test locations, default is
+#' @param test \code{\linkS4class{SWD}} object with the test locations, default
+#' is \code{NULL}.
+#' @param type character. The output type used for "Maxent" and "Maxnet"
+#' methods, possible values are "cloglog" and "logistic", default is
 #' \code{NULL}.
 #' @param response_curves logical, if \code{TRUE} it plots the response curves
 #' in the html output, default is \code{FALSE}.
+#' @param only_presence logical, if \code{TRUE} it uses only the range of the
+#' presence location for the marginal response, default is \code{FALSE}.
 #' @param jk logical, if \code{TRUE} it runs the jackknife test, default
 #' \code{FALSE}.
 #' @param env \code{\link[raster]{stack}}. If provided it computes and adds a
@@ -39,33 +42,30 @@
 #'                     pattern = "grd", full.names = TRUE)
 #' predictors <- raster::stack(files)
 #'
-#' # Prepare presence locations
-#' p_coords <- condor[, 1:2]
-#'
-#' # Prepare background locations
-#' bg_coords <- dismo::randomPoints(predictors, 5000)
+#' # Prepare presence and background locations
+#' p_coords <- virtualSp$presence
+#' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-#'                        env = predictors, categorical = "biome")
-#' bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-#'                  env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+#'                    env = predictors, categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(presence, test = 0.2)
+#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxent", p = train, a = bg, fc = "l")
+#' model <- train(method = "Maxent", data = train, fc = "l")
 #'
 #' # Create the report
 #' modelReport(model, type = "cloglog", folder = "my_folder", test = test,
-#'             response_curves = TRUE, jk = TRUE, env = predictors)
+#'             response_curves = TRUE, only_presence = TRUE, jk = TRUE,
+#'             env = predictors)
 #' }
-modelReport <- function(model, type, folder, test = NULL,
-                        response_curves = FALSE, jk = FALSE, env = NULL,
-                        clamp = TRUE, permut = 10) {
+modelReport <- function(model, folder, test = NULL, type = NULL,
+                        response_curves = FALSE, only_presence = FALSE,
+                        jk = FALSE, env = NULL, clamp = TRUE, permut = 10) {
 
   if (file.exists(paste0(getwd(), "/", folder))) {
     msg <- message(crayon::red(cli::symbol$fancy_question_mark),
@@ -82,8 +82,8 @@ modelReport <- function(model, type, folder, test = NULL,
     folder <- file.path(getwd(), folder)
     dir.create(file.path(folder, "plots"), recursive = TRUE,
                showWarnings = FALSE)
-    species <- gsub(" ", "_", tolower(model@p@species))
-    title <- paste(class(model@model), "model for", model@p@species)
+    species <- gsub(" ", "_", tolower(model@data@species))
+    title <- paste(class(model@model), "model for", model@data@species)
     args <- c(paste0("--metadata=title:\"", title, "\""))
     output_file <- paste0(species, ".html")
 
@@ -93,10 +93,11 @@ modelReport <- function(model, type, folder, test = NULL,
                       params = list(model = model, type = type, test = test,
                                     folder = folder, env = env, jk = jk,
                                     response_curves = response_curves,
+                                    only_presence = only_presence,
                                     clamp = clamp, permut = permut),
                       output_options = list(pandoc_args = args),
                       quiet = TRUE
                       )
+    utils::browseURL(file.path(folder, output_file))
   }
-  utils::browseURL(file.path(folder, output_file))
 }

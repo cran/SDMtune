@@ -7,11 +7,12 @@
 #' specificity and maximum test sensitivity plus specificity thresholds and the
 #' p-values of the one-tailed binomial exact test.
 #'
-#' @param model \linkS4class{SDMmodel} object.
-#' @param type character. The output type, possible values are "cloglog" and
-#' "logistic", default is "cloglog".
-#' @param test \linkS4class{SWD} test locations, if not provided it returns the
-#' training and test thresholds, default is \code{NULL}.
+#' @param model \code{\linkS4class{SDMmodel}} object.
+#' @param type character. The output type used for "Maxent" and "Maxnet"
+#' methods, possible values are "cloglog" and "logistic", default is
+#' \code{NULL}.
+#' @param test \code{\linkS4class{SWD}} test locations, if not provided it
+#' returns the training and test thresholds, default is \code{NULL}.
 #'
 #' @details The equal training sensitivity and specificity minimizes the
 #' difference between sensitivity and specificity. The one-tailed binomial test
@@ -30,41 +31,37 @@
 #'                     pattern = "grd", full.names = TRUE)
 #' predictors <- raster::stack(files)
 #'
-#' # Prepare presence locations
-#' p_coords <- condor[, 1:2]
-#'
-#' # Prepare background locations
-#' bg_coords <- dismo::randomPoints(predictors, 5000)
+#' # Prepare presence and background locations
+#' p_coords <- virtualSp$presence
+#' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-#'                        env = predictors, categorical = "biome")
-#' bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-#'                  env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+#'                    env = predictors, categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(presence, test = 0.2)
+#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", p = train, a = bg, fc = "l")
+#' model <- train(method = "Maxnet", data = train, fc = "l")
 #'
 #' # Get the cloglog thresholds
 #' thresholds(model, type = "cloglog")
 #'
 #' # Get the logistic thresholds passing the test dataset
 #' thresholds(model, type = "logistic", test = test)
-thresholds <- function(model, type, test = NULL) {
+thresholds <- function(model, type = NULL, test = NULL) {
 
-  n_pres <- nrow(model@p@data)
+  n_pres <- sum(model@data@pa == 1)
 
   cm_train <- confMatrix(model, type = type)
   tpr <- cm_train$tp / (cm_train$tp + cm_train$fn)
   tnr <- cm_train$tn / (cm_train$fp + cm_train$tn)
   fpr <- cm_train$fp / (cm_train$fp + cm_train$tn)
 
-  mtp <- min(predict(model, model@p@data, type = type))
+  mtp <- min(predict(model, .get_presence(model@data), type = type))
   ess <- cm_train$th[which.min(abs(tpr - tnr))]
   mss <- cm_train$th[which.max(tpr + tnr)]
 
@@ -112,10 +109,9 @@ thresholds <- function(model, type, test = NULL) {
 
   output <- data.frame(th = rownames, val = ths, fpa = fpa, or = or_train,
                        stringsAsFactors = FALSE)
-  output[, 2:4] <- round(output[, 2:4], 3)
 
   if (!is.null(test)) {
-    output$or_test <- round(or_test, 3)
+    output$or_test <- or_test
     output$pv <- p_values
   }
 

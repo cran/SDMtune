@@ -4,23 +4,28 @@
 \alias{modelReport}
 \title{Model Report}
 \usage{
-modelReport(model, type, folder, test = NULL, response_curves = FALSE,
-  jk = FALSE, env = NULL, clamp = TRUE, permut = 10)
+modelReport(model, folder, test = NULL, type = NULL,
+  response_curves = FALSE, only_presence = FALSE, jk = FALSE,
+  env = NULL, clamp = TRUE, permut = 10)
 }
 \arguments{
-\item{model}{\linkS4class{SDMmodel} object.}
-
-\item{type}{character. Output type, see \code{\link{predict,SDMmodel-method}}
-for more details.}
+\item{model}{\code{\linkS4class{SDMmodel}} object.}
 
 \item{folder}{character. The name of the folder in which to save the output.
 The folder is created in the working directory.}
 
-\item{test}{\linkS4class{SWD} object with the test locations, default is
+\item{test}{\code{\linkS4class{SWD}} object with the test locations, default
+is \code{NULL}.}
+
+\item{type}{character. The output type used for "Maxent" and "Maxnet"
+methods, possible values are "cloglog" and "logistic", default is
 \code{NULL}.}
 
 \item{response_curves}{logical, if \code{TRUE} it plots the response curves
 in the html output, default is \code{FALSE}.}
+
+\item{only_presence}{logical, if \code{TRUE} it uses only the range of the
+presence location for the marginal response, default is \code{FALSE}.}
 
 \item{jk}{logical, if \code{TRUE} it runs the jackknife test, default
 \code{FALSE}.}
@@ -47,29 +52,26 @@ files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
                     pattern = "grd", full.names = TRUE)
 predictors <- raster::stack(files)
 
-# Prepare presence locations
-p_coords <- condor[, 1:2]
-
-# Prepare background locations
-bg_coords <- dismo::randomPoints(predictors, 5000)
+# Prepare presence and background locations
+p_coords <- virtualSp$presence
+bg_coords <- virtualSp$background
 
 # Create SWD object
-presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-                       env = predictors, categorical = "biome")
-bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-                 env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+                   env = predictors, categorical = "biome")
 
 # Split presence locations in training (80\%) and testing (20\%) datasets
-datasets <- trainValTest(presence, test = 0.2)
+datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
 train <- datasets[[1]]
 test <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxent", p = train, a = bg, fc = "l")
+model <- train(method = "Maxent", data = train, fc = "l")
 
 # Create the report
 modelReport(model, type = "cloglog", folder = "my_folder", test = test,
-            response_curves = TRUE, jk = TRUE, env = predictors)
+            response_curves = TRUE, only_presence = TRUE, jk = TRUE,
+            env = predictors)
 }
 }
 \author{

@@ -4,24 +4,27 @@
 \alias{plotResponse}
 \title{Plot Response Curve}
 \usage{
-plotResponse(model, var, type, marginal = FALSE, fun = mean,
-  clamp = TRUE, rug = FALSE, color = "red")
+plotResponse(model, var, type = NULL, only_presence = FALSE,
+  marginal = FALSE, fun = mean, rug = FALSE, color = "red")
 }
 \arguments{
-\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
+\item{model}{\code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
+object.}
 
 \item{var}{character. Name of the variable to be plotted.}
 
-\item{type}{character. Output type, see \code{\link{predict,SDMmodel-method}}
-for more details.}
+\item{type}{character. The output type used for "Maxent" and "Maxnet"
+methods, possible values are "cloglog" and "logistic", default is
+\code{NULL}.}
+
+\item{only_presence}{logical, f \code{TRUE} it uses only the range of the
+presence location for the marginal response, default is \code{FALSE}.}
 
 \item{marginal}{logical, if \code{TRUE} it plots the marginal response curve,
 default is \code{FALSE}.}
 
 \item{fun}{function used to compute the level of the other variables for
-marginal curves, possible values are mean and median, default is mean.}
-
-\item{clamp}{logical for clumping during prediction, default is \code{TRUE}.}
+marginal curves, default is \code{mean}.}
 
 \item{rug}{logical, if \code{TRUE} it adds the rug plot for the presence and
 absence/background locations, available only for continuous variables,
@@ -46,20 +49,16 @@ files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
                     pattern = "grd", full.names = TRUE)
 predictors <- raster::stack(files)
 
-# Prepare presence locations
-p_coords <- condor[, 1:2]
-
-# Prepare background locations
-bg_coords <- dismo::randomPoints(predictors, 5000)
+# Prepare presence and background locations
+p_coords <- virtualSp$presence
+bg_coords <- virtualSp$background
 
 # Create SWD object
-presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-                       env = predictors, categorical = "biome")
-bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-                 env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+                   env = predictors, categorical = "biome")
 
 # Train a model
-model <- train(method = "Maxnet", p = presence, a = bg, fc = "l")
+model <- train(method = "Maxnet", data = data, fc = "l")
 
 # Plot cloglog response curve for a continuous environmental variable (bio1)
 plotResponse(model, var = "bio1", type = "cloglog")

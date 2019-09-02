@@ -2,15 +2,18 @@
 #'
 #' Plot the Response Curve of the given environmental variable.
 #'
-#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
+#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
+#' object.
 #' @param var character. Name of the variable to be plotted.
-#' @param type character. Output type, see \code{\link{predict,SDMmodel-method}}
-#' for more details.
+#' @param type character. The output type used for "Maxent" and "Maxnet"
+#' methods, possible values are "cloglog" and "logistic", default is
+#' \code{NULL}.
+#' @param only_presence logical, f \code{TRUE} it uses only the range of the
+#' presence location for the marginal response, default is \code{FALSE}.
 #' @param marginal logical, if \code{TRUE} it plots the marginal response curve,
 #' default is \code{FALSE}.
 #' @param fun function used to compute the level of the other variables for
-#' marginal curves, possible values are mean and median, default is mean.
-#' @param clamp logical for clumping during prediction, default is \code{TRUE}.
+#' marginal curves, default is \code{mean}.
 #' @param rug logical, if \code{TRUE} it adds the rug plot for the presence and
 #' absence/background locations, available only for continuous variables,
 #' default is \code{FALSE}.
@@ -21,7 +24,6 @@
 #'
 #' @return A \code{\link[ggplot2]{ggplot}} object.
 #' @export
-#' @include Maxent_class.R
 #' @importFrom ggplot2 ggplot aes_string geom_line geom_bar scale_x_continuous
 #' geom_ribbon geom_errorbar geom_rug labs theme
 #' @importFrom raster modal
@@ -35,20 +37,16 @@
 #'                     pattern = "grd", full.names = TRUE)
 #' predictors <- raster::stack(files)
 #'
-#' # Prepare presence locations
-#' p_coords <- condor[, 1:2]
-#'
-#' # Prepare background locations
-#' bg_coords <- dismo::randomPoints(predictors, 5000)
+#' # Prepare presence and background locations
+#' p_coords <- virtualSp$presence
+#' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' presence <- prepareSWD(species = "Vultur gryphus", coords = p_coords,
-#'                        env = predictors, categorical = "biome")
-#' bg <- prepareSWD(species = "Vultur gryphus", coords = bg_coords,
-#'                  env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
+#'                    env = predictors, categorical = "biome")
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", p = presence, a = bg, fc = "l")
+#' model <- train(method = "Maxnet", data = data, fc = "l")
 #'
 #' # Plot cloglog response curve for a continuous environmental variable (bio1)
 #' plotResponse(model, var = "bio1", type = "cloglog")
@@ -76,36 +74,38 @@
 #' # (biome) giving a custom color
 #' plotResponse(model, var = "biome", type = "logistic", color = "green")
 #' }
-plotResponse <- function(model, var, type, marginal = FALSE, fun = mean,
-                         clamp = TRUE, rug = FALSE, color = "red") {
+plotResponse <- function(model, var, type = NULL, only_presence = FALSE,
+                         marginal = FALSE, fun = mean, rug = FALSE,
+                         color = "red") {
 
-  if (!var %in% names(model@p@data))
+  if (!var %in% names(model@data@data))
     stop(paste(var, "is not used to train the model!"))
 
-  if (class(model) == "SDMmodel") {
-    a <- model@a
+  p <- .get_presence(model@data)
+  a <- .get_absence(model@data)
+
+  if (only_presence) {
+    df <- p
   } else {
-    a <- model@models[[1]]@a
+    df <- model@data@data
   }
 
-  p <- model@p
-  cont_vars <- names(Filter(is.numeric, a@data))
-  cat_vars <- names(Filter(is.factor, a@data))
+  cont_vars <- names(Filter(is.numeric, p))
+  cat_vars <- names(Filter(is.factor, p))
 
   if (var %in% cat_vars) {
-    categ <- unique(as.numeric(levels(a@data[, var]))[a@data[, var]])
+    categ <- unique(as.numeric(levels(df[, var]))[df[, var]])
     n_rows <- length(categ)
   } else {
     n_rows <- 100
   }
 
-  p_rug <- data.frame(x = p@data[, var])
-  a_rug <- data.frame(x = a@data[, var])
+  p_rug <- data.frame(x = p[, var])
+  a_rug <- data.frame(x = a[, var])
 
   if (class(model) == "SDMmodel") {
-    plot_data <- .get_plot_data(model, p, a, var, cont_vars, cat_vars,
-                                n_rows, p_rug, fun, marginal, clamp, type,
-                                categ)
+    plot_data <- .get_plot_data(model, var, df, cont_vars, cat_vars, n_rows,
+                                fun, marginal, type, categ)
 
     if (var %in% cont_vars) {
       my_plot <- ggplot(plot_data, aes_string(x = "x", y = "y")) +
@@ -119,16 +119,13 @@ plotResponse <- function(model, var, type, marginal = FALSE, fun = mean,
     }
   } else {
     nf <- length(model@models)
-    plot_data <- .get_plot_data(model@models[[1]], p, a, var, cont_vars,
-                                cat_vars, n_rows, p_rug, fun, marginal,
-                                clamp, type, categ)
+    plot_data <- .get_plot_data(model@models[[1]], var, df, cont_vars, cat_vars,
+                                n_rows, fun, marginal, type, categ)
     colnames(plot_data) <- c("x", "y_1")
     for (i in 2:nf)
-      plot_data[paste0("y_", i)] <- .get_plot_data(model@models[[i]], p, a,
-                                                   var, cont_vars, cat_vars,
-                                                   n_rows, p_rug, fun,
-                                                   marginal, clamp, type,
-                                                   categ)$y
+      plot_data[paste0("y_", i)] <- .get_plot_data(model@models[[i]], var, df,
+                                                   cont_vars, cat_vars, n_rows,
+                                                   fun, marginal, type, categ)$y
     plot_data$y <- rowMeans(plot_data[, -1])
     plot_data$sd <- apply(plot_data[, 2:(nf + 1)], 1, sd, na.rm = TRUE)
     plot_data$y_min <- plot_data$y - plot_data$sd
@@ -151,7 +148,8 @@ plotResponse <- function(model, var, type, marginal = FALSE, fun = mean,
   }
 
   my_plot <- my_plot +
-    labs(x = var, y = paste(type, "output")) +
+    labs(x = var, y = ifelse(!is.null(type), paste(type, "output"),
+                             "Probability of presence")) +
     theme_minimal() +
     theme(text = element_text(colour = "#666666", family = "sans-serif"))
 
@@ -167,39 +165,31 @@ plotResponse <- function(model, var, type, marginal = FALSE, fun = mean,
 }
 
 
-.get_plot_data <- function(model, p, a, var, cont_vars, cat_vars, n_rows,
-                           p_rug, fun, marginal, clamp, type, categ) {
+.get_plot_data <- function(model, var, df, cont_vars, cat_vars, n_rows, fun,
+                           marginal, type, categ) {
 
-  data <- data.frame(matrix(NA, nrow = 1, ncol = ncol(p@data)))
-  colnames(data) <- colnames(p@data)
-  data[cont_vars] <- apply(p@data[cont_vars], 2, fun)
-  data[cat_vars] <- as.factor(apply(p@data[cat_vars], 2, raster::modal))
+  data <- data.frame(matrix(NA, nrow = 1, ncol = ncol(df)))
+  colnames(data) <- colnames(df)
+  data[cont_vars] <- apply(df[cont_vars], 2, fun)
+  data[cat_vars] <- as.factor(apply(df[cat_vars], 2, raster::modal))
   data <- do.call("rbind", replicate(n_rows, data, simplify = FALSE))
 
-  if (clamp & var %in% cont_vars) {
-    var_min <- min(a@data[var])
-    var_max <- max(a@data[var])
-    p_rug <- data.frame(x = clamp(p_rug$x, var_min, var_max))
-  } else if (var %in% cont_vars) {
-    var_min <- min(rbind(p@data[var], a@data[var]))
-    var_max <- max(rbind(p@data[var], a@data[var]))
-  }
-
   if (var %in% cont_vars) {
+    var_min <- min(df[var])
+    var_max <- max(df[var])
     data[var] <- seq(var_min, var_max, length.out = n_rows)
   } else {
     data[var] <- categ
   }
 
   if (!marginal) {
-    p@data <- model@p@data[var]
-    a@data <- model@a@data[var]
-    settings <- list(p = p, a = a)
-
+    new_data <- model@data
+    new_data@data <- new_data@data[, var, drop = FALSE]
+    settings <- list(data = new_data)
     model <- .create_model_from_settings(model, settings)
   }
 
-  pred <- predict(model, data, type = type, clamp = clamp)
+  pred <- predict(model, data, type = type)
   plot_data <- data.frame(x = data[, var], y = pred)
 
   return(plot_data)
