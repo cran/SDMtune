@@ -14,8 +14,9 @@ setGeneric("predict", function(object, ...)
 #' **Maxnet** methods, default is \code{NULL}.
 #' @param clamp logical for clumping during prediction, used only for **Maxent**
 #' and **Maxnet** methods, default is \code{TRUE}.
-#' @param filename character. Output file name for the prediction map, if
-#' provided the output is saved in a file.
+#' @param filename character. Output file name for the prediction map, used only
+#' when \code{data} is a \code{\link[raster]{stack}} object. If provided the
+#' output is saved in a file.
 #' @param format character. The output format, see
 #' \code{\link[raster]{writeRaster}} for all the options, default is "GTiff".
 #' @param extent \code{\link[raster]{Extent}} object, if provided it restricts
@@ -28,11 +29,16 @@ setGeneric("predict", function(object, ...)
 #' \code{\link[raster]{writeRaster}} function.
 #'
 #' @details
+#' * filename, format, extent, parallel, progress and ... arguments are used
+#' only when the prediction is done for a \code{\link[raster]{stack}} object.
 #' * For models trained with the **Maxent** method the argument \code{type} can
 #' be: "raw", "logistic" and "cloglog".
 #' * For models trained with the **Maxnet** method the argument \code{type} can
 #' be: "link", "exponential", "logistic" and "cloglog", see
-#' \code{\link[maxnet]{maxnet}} for more details.
+#' \code{\link[maxnet]{maxnet}} for more details. The function performs the
+#' prediction in **R** without calling the **MaxEnt** Java software. This
+#' results in a faster computation for large datasets. The results might differ
+#' slightly from the Java software output.
 #' * For models trained with the **ANN** method the function uses the "raw"
 #' output type.
 #' * For models trained with the **RF** method the output is the probability of
@@ -50,8 +56,8 @@ setGeneric("predict", function(object, ...)
 #' @importFrom raster beginCluster clusterR endCluster predict clamp subset
 #' @importFrom stats formula model.matrix
 #'
-#' @return A vector with the prediction or a Raster object if data is a raster
-#' \code{\link[raster]{stack}}.
+#' @return A vector with the prediction or a \code{\link[raster]{raster}} object
+#' if data is a raster \code{\link[raster]{stack}}.
 #' @exportMethod predict
 #'
 #' @author Sergio Vignali
@@ -108,7 +114,9 @@ setMethod("predict",
             if (inherits(data, "Raster")) {
               data <- raster::subset(data, vars)
               if (parallel) {
-                suppressMessages(raster::beginCluster())
+                start_cluster <- getOption("SDMtuneParallel")
+                if (is.null(start_cluster) || !start_cluster)
+                  suppressMessages(raster::beginCluster())
                 pred <- raster::clusterR(data,
                                          predict,
                                          args = list(model = model,
@@ -120,7 +128,8 @@ setMethod("predict",
                                          format = format,
                                          ext = extent,
                                          ...)
-                raster::endCluster()
+                if (is.null(start_cluster) || !start_cluster)
+                  raster::endCluster()
               } else {
                 pred <- raster::predict(data, model = model,
                                         type = type,

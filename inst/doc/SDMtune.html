@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -286,7 +287,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -360,18 +360,6 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
@@ -416,7 +404,7 @@ $(document).ready(function () {
 #&gt;   / ___/ / __ \ /  |/  // /_ __  __ ____   ___
 #&gt;   \__ \ / / / // /|_/ // __// / / // __ \ / _ \
 #&gt;  ___/ // /_/ // /  / // /_ / /_/ // / / //  __/
-#&gt; /____//_____//_/  /_/ \__/ \__,_//_/ /_/ \___/  version 0.2.0
+#&gt; /____//_____//_/  /_/ \__/ \__,_//_/ /_/ \___/  version 0.2.1
 #&gt; 
 #&gt; To cite this package in publications type: citation(&quot;SDMtune&quot;).</code></pre>
 <p>Check if maxent is correctly configured for <code>dismo</code>:</p>
@@ -448,6 +436,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

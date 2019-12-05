@@ -19,8 +19,8 @@
 #' default is \code{FALSE}.
 #' @param color The color of the curve, default is "red".
 #'
-#' @details Note that fun is not a character argument, you must use mean and
-#' not "mean".
+#' @details Note that fun is not a character argument, you must use \code{mean}
+#' and not \code{"mean"}.
 #'
 #' @return A \code{\link[ggplot2]{ggplot}} object.
 #' @export
@@ -151,7 +151,7 @@ plotResponse <- function(model, var, type = NULL, only_presence = FALSE,
     labs(x = var, y = ifelse(!is.null(type), paste(type, "output"),
                              "Probability of presence")) +
     theme_minimal() +
-    theme(text = element_text(colour = "#666666", family = "sans-serif"))
+    theme(text = element_text(colour = "#666666"))
 
   if (rug == TRUE & var %in% cont_vars) {
     my_plot <- my_plot +

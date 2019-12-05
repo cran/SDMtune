@@ -8,8 +8,8 @@ train(method, data, folds = NULL, verbose = TRUE, p = NULL,
   a = NULL, rep = NULL, seed = NULL, ...)
 }
 \arguments{
-\item{method}{character. Method used to train the model, possible values are
-"ANN", "BRT", "Maxent", "Maxnet" or "RF".}
+\item{method}{character or character vector. Method used to train the model,
+possible values are "ANN", "BRT", "Maxent", "Maxnet" or "RF", see details.}
 
 \item{data}{\code{\linkS4class{SWD}} object with presence and
 absence/background locations.}
@@ -32,6 +32,7 @@ validation, default is \code{TRUE}.}
 }
 \value{
 An \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
+or a list of model objects.
 object.
 }
 \description{
@@ -94,6 +95,10 @@ combinations of "l", "q", "p", "h" and "t", default is "lqph".
 The folds argument accepts also objects created with other packages:
 \pkg{ENMeval} or \pkg{blockCV}. In this case the function converts
 internally the folds into a format valid for \pkg{SDMtune}.
+
+When multiple methods are given as \code{method} argument, the function
+returns a named list of model object, with the name corresponding to the
+used method, see examples.
 }
 \examples{
 \donttest{
@@ -125,15 +130,15 @@ model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
 
 # Block partition using the ENMeval package
 # library(ENMeval)
-block_folds <- get.block(occ = data@data[data@pa == 1, ],
-                         bg.coords = data@data[data@pa == 0, ])
+block_folds <- get.block(occ = data@coords[data@pa == 1, ],
+                         bg.coords = data@coords[data@pa == 0, ])
 model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
                folds = block_folds)
 
 # Checkerboard1 partition using the ENMeval package
-cb_folds <- get.checkerboard1(occ = data@data[data@pa == 1, ],
+cb_folds <- get.checkerboard1(occ = data@coords[data@pa == 1, ],
                               env = predictors,
-                              bg.coords = data@data[data@pa == 0, ],
+                              bg.coords = data@coords[data@pa == 0, ],
                               aggregation.factor = 4)
 model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
                folds = cb_folds)
@@ -157,7 +162,7 @@ model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
 # Train presence absence models
 # Prepare presence and absence locations
 p_coords <- virtualSp$presence
-a_coords <- virtualSp$absence#'
+a_coords <- virtualSp$absence
 # Create SWD object
 data <- prepareSWD(species = "Virtual species", p = p_coords, a = a_coords,
                    env = predictors[[1:5]])
@@ -170,6 +175,16 @@ model <- train("RF", data = data, ntree = 300)
 
 # Train a Boosted Regression Tree model
 model <- train("BRT", data = data, n.trees = 300, shrinkage = 0.001)
+
+# Multiple methods trained together with default arguments
+output <- train(method = c("ANN", "BRT", "RF"), data = data, size = 10)
+output$ANN
+output$BRT
+output$RF
+
+# Multiple methods trained together passing extra arguments
+output <- train(method = c("ANN", "BRT", "RF"), data = data, size = 10,
+                ntree = 300, n.trees = 300, shrinkage = 0.001)
 }
 }
 \references{

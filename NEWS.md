@@ -1,3 +1,13 @@
+# SDMtune 0.2.1
+* New function to predict SDMmodelCV objects
+* Add the possibility to pass multiple methods to the `train` function
+* Add possibility to compute the testing AUC or TSS for a held apart testing dataset in the case of a `SDMmodelCV` object
+* Add the possibility to merge only the presence locations in the `mergeSWD` function
+
+Bug fix:
+* `plotPA` function now works also with large raster objects 
+* Removed font family from plot functions to avoid errors when the font is not available
+
 # SDMtune 0.2.0
 This release is the first step to enable more methods to train models. The main change is that the `SDW` object now bundles together the presence and the absence/background locations and is not necessary anymore to pass the presence and absence locations as separate arguments to the `train` function.
 

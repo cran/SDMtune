@@ -50,9 +50,14 @@
 #' confMatrix(model, type = "logistic", th = 0.6)
 confMatrix <- function(model, test = NULL, th = NULL, type = NULL) {
 
+  if (class(model) != "SDMmodel")
+    stop("Function available only for SDMmodel objects.")
+
   if (is.null(test)) {
     data <- model@data
   } else {
+    if (class(test) != "SWD")
+      stop("\"test\" argument invalid, use an SWD object.")
     # TODO check if I can remove this: test@data[colnames(model@p@data)]
     data <- test
   }

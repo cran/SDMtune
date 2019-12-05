@@ -55,7 +55,12 @@ plotPA <- function(map, th, colors = NULL, hr = FALSE, filename = NULL,
     maxpixels <- 50000
   }
 
-  my_plot <- rasterVis::gplot(pa, maxpixels = maxpixels) +
+  my_plot <- rasterVis::gplot(pa, maxpixels = maxpixels)
+
+  # In some cases rasterVis changes logical values into 0s and 1s
+  my_plot$data$value <- as.logical(my_plot$data$value)
+
+  my_plot <- my_plot +
     geom_tile(aes_(fill = ~value)) +
     scale_fill_manual(values = colors,
                       breaks = c(1, 0),
@@ -69,7 +74,7 @@ plotPA <- function(map, th, colors = NULL, hr = FALSE, filename = NULL,
     theme(plot.title = element_text(hjust = 0.5),
           axis.ticks.x = element_blank(),
           axis.ticks.y = element_blank(),
-          text = element_text(colour = "#666666", family = "sans-serif"))
+          text = element_text(colour = "#666666"))
 
   return(my_plot)
 }
