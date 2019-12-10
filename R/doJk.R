@@ -16,12 +16,14 @@
 #' @param env \code{\link[raster]{stack}} containing the environmental
 #' variables, used only with "aicc", default is \code{NULL}.
 #' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}. Used only with AICc.
+#' is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.
 #' @param return_models logical, if \code{TRUE} returns all the models together
 #' with the test result, default is \code{FALSE}.
 #'
-#' @details Parallel computation increases the speed only for large datasets due
-#' to the time necessary to create the cluster.
+#' @details Parallel computation is used only during the execution of the
+#' predict function, and increases the speed only for large datasets. For small
+#' dataset it may result in a longer execution, due to the time necessary to
+#' create the cluster.
 #'
 #' @return A data frame with the test results. If "\code{return_model = TRUE}"
 #' it returns a list containing the test results together with the models.

@@ -1,5 +1,15 @@
+# SDMtune 1.0.0
+Main changes:
+* In this release all deprecated functions and functions' arguments have been removed, including the functions to convert old objects (created with version < 0.2.0.) into the new format.
+* Add function `addSamplesToBg` to add presence locations to background location.
+* `extra_args` in Maxent models cannot be changed anymore.
+
+Bug fix:
+* Fix CRAN error for r-oldrel
+
 # SDMtune 0.2.1
-* New function to predict SDMmodelCV objects
+Main changes:
+* New function to predict `SDMmodelCV` objects
 * Add the possibility to pass multiple methods to the `train` function
 * Add possibility to compute the testing AUC or TSS for a held apart testing dataset in the case of a `SDMmodelCV` object
 * Add the possibility to merge only the presence locations in the `mergeSWD` function
@@ -14,7 +24,6 @@ This release is the first step to enable more methods to train models. The main 
 Old objects of class `SWD`, `SDMmodel`, `SDMmodelCV` and `SDMtune` created with version <= 0.1.1 must be converted into the new format using the dedicated help functions. Please check the article [Deprecated objects](https://consbiol-unibern.github.io/SDMtune/articles/articles/deprecated-objects.html) in the package website.  
 
 Main changes:
-
 * The `SWD` object bundles together the presence and absence/background locations
 * New methods to train models: Artificial Neural Network (ANN), Boosted Regression Trees (BRT) and Random Forest (RF)
 * Enabled spatial cross validation: the function `train` accepts now folds partition generated with other packages (i.e. ENMeval and blockCV)
@@ -23,7 +32,6 @@ Main changes:
 * Number of background locations cannot be tuned anymore using the tuning functions
 
 Deprecated function:
-
 * `getSubsample`
 
 # SDMtune 0.1.1

@@ -4,8 +4,8 @@
 \alias{gridSearch}
 \title{Grid Search}
 \usage{
-gridSearch(model, hypers, metric, test = NULL, bg4test = NULL,
-  env = NULL, parallel = FALSE, save_models = TRUE, seed = NULL)
+gridSearch(model, hypers, metric, test = NULL, env = NULL,
+  parallel = FALSE, save_models = TRUE)
 }
 \arguments{
 \item{model}{\code{\linkS4class{SDMmodel}} or code{\linkS4class{SDMmodelCV}}
@@ -21,20 +21,16 @@ values are: "auc", "tss" and "aicc".}
 model, not used with \code{\link{aicc}} and code{\linkS4class{SDMmodelCV}}
 objects, default is \code{NULL}.}
 
-\item{bg4test}{Deprecated.}
-
 \item{env}{\code{\link[raster]{stack}} containing the environmental
 variables, used only with "aicc", default is \code{NULL}.}
 
 \item{parallel}{logical, if \code{TRUE} it uses parallel computation, default
-is \code{FALSE}.}
+is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.}
 
 \item{save_models}{logical, if \code{FALSE} the models are not saved and the
 output contains only a data frame with the metric values for each
 hyperparameter combination. Default is \code{TRUE}, set it to \code{FALSE}
 when there are many combinations to avoid R crashing for memory overload.}
-
-\item{seed}{Deprecated.}
 }
 \value{
 code{\linkS4class{SDMtune}} object.
@@ -44,11 +40,16 @@ Given a set of possible hyperparameter values, the function trains models
 with all the possible combinations of hyperparameters.
 }
 \details{
-To know which hyperparameters can be tune you can use the output of
-the function \code{\link{get_tunable_args}}. Hyperparameters not included in
-the \code{hypers} argument take the value that they have in the passed model.
-Parallel computation increases the speed only for large datasets due to the
-time necessary to create the cluster.
+\itemize{
+\item To know which hyperparameters can be tuned you can use the output
+of the function \code{\link{get_tunable_args}}. Hyperparameters not included
+in the \code{hypers} argument take the value that they have in the passed
+model.
+\item Parallel computation is used only during the execution of the predict
+function, and increases the speed only for large datasets. For small dataset
+it may result in a longer execution, due to the time necessary to create the
+cluster.
+}
 }
 \examples{
 \donttest{

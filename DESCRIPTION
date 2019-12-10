@@ -1,8 +1,8 @@
 Package: SDMtune
 Type: Package
 Title: Species Distribution Model Selection
-Version: 0.2.1
-Date: 2019-12-05
+Version: 1.0.0
+Date: 2019-12-10
 Authors@R: c(
 	  person("Sergio", "Vignali",  email = "sergio.vignali@iee.unibe.ch",
 	         role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3390-5442")),
@@ -42,11 +42,11 @@ VignetteBuilder: knitr
 Collate: 'ANN-class.R' 'BRT-class.R' 'Maxent-class.R' 'Maxnet-class.R'
         'RF-class.R' 'RcppExports.R' 'SWD-class.R' 'SDMmodel-class.R'
         'SDMmodel2MaxEnt.R' 'SDMmodelCV-class.R' 'SDMtune-class.R'
-        'SDMtune.R' 'aicc.R' 'auc.R' 'chart-utils.R' 'confMatrix.R'
-        'convertFolds.R' 'corVar.R' 'doJk.R' 'getSubsample.R'
-        'gridSearch.R' 'help-functions.R' 'maxentTh.R' 'maxentVarImp.R'
-        'mergeSWD.R' 'modelReport.R' 'optimizeModel.R' 'plotCor.R'
-        'plotJk.R' 'plotPA.R' 'plotPred.R' 'plotROC.R' 'plotResponse.R'
+        'SDMtune.R' 'addSamplesToBg.R' 'aicc.R' 'auc.R' 'chart-utils.R'
+        'confMatrix.R' 'convertFolds.R' 'corVar.R' 'doJk.R'
+        'gridSearch.R' 'maxentTh.R' 'maxentVarImp.R' 'mergeSWD.R'
+        'modelReport.R' 'optimizeModel.R' 'plotCor.R' 'plotJk.R'
+        'plotPA.R' 'plotPred.R' 'plotROC.R' 'plotResponse.R'
         'plotVarImp.R' 'predict-ANN.R' 'predict-BRT.R'
         'predict-Maxent.R' 'predict-RF.R' 'predict-SDMmodel.R'
         'predict-SDMmodelCV.R' 'prepareSWD.R' 'randomFolds.R'
@@ -56,11 +56,11 @@ Collate: 'ANN-class.R' 'BRT-class.R' 'Maxent-class.R' 'Maxnet-class.R'
         'tss.R' 'utils.R' 'varImp.R' 'varSel.R' 'virtualSp.R' 'zzz.R'
 Language: en-US
 NeedsCompilation: yes
-Packaged: 2019-12-05 13:50:45 UTC; vignali
+Packaged: 2019-12-10 14:45:55 UTC; vignali
 Author: Sergio Vignali [aut, cre] (<https://orcid.org/0000-0002-3390-5442>),
   Arnaud Barras [aut] (<https://orcid.org/0000-0003-0850-6965>),
   Veronika Braunisch [aut] (<https://orcid.org/0000-0001-7035-4662>),
   Conservation Biology - University of Bern [fnd]
 Maintainer: Sergio Vignali <sergio.vignali@iee.unibe.ch>
 Repository: CRAN
-Date/Publication: 2019-12-05 14:20:02 UTC
+Date/Publication: 2019-12-10 17:00:02 UTC

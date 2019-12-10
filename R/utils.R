@@ -311,3 +311,23 @@ get_tunable_args <- function(model) {
   grid <- expand.grid(tunable_args, stringsAsFactors = FALSE)
   return(grid)
 }
+
+.args_name <- function(x) {
+  output <- switch(x,
+    "trainANN" = c("data", "size", "decay", "rang", "maxit"),
+    "trainBRT" = c("data", "distribution", "n.trees", "interaction.depth",
+                   "shrinkage", "bag.fraction"),
+    "trainMaxent" = c("data", "reg", "fc", "iter", "extra_args"),
+    "trainMaxnet" = c("data", "reg", "fc"),
+    "trainRF" = c("data", "mtry", "ntree", "nodesize")
+  )
+  return(output)
+}
+
+#' @importFrom raster endCluster
+.end_parallel <- function() {
+  options(SDMtuneParallel = FALSE)
+  raster_option <- getOption("rasterCluster")
+  if (!is.null(raster_option) && raster_option)
+    raster::endCluster()
+}

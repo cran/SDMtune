@@ -12,22 +12,23 @@
 #' @param test code{\linkS4class{SWD}} object. Test dataset used to evaluate the
 #' model, not used with \code{\link{aicc}} and code{\linkS4class{SDMmodelCV}}
 #' objects, default is \code{NULL}.
-#' @param bg4test Deprecated.
 #' @param env \code{\link[raster]{stack}} containing the environmental
 #' variables, used only with "aicc", default is \code{NULL}.
 #' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}.
+#' is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.
 #' @param save_models logical, if \code{FALSE} the models are not saved and the
 #' output contains only a data frame with the metric values for each
 #' hyperparameter combination. Default is \code{TRUE}, set it to \code{FALSE}
 #' when there are many combinations to avoid R crashing for memory overload.
-#' @param seed Deprecated.
 #'
-#' @details To know which hyperparameters can be tune you can use the output of
-#' the function \code{\link{get_tunable_args}}. Hyperparameters not included in
-#' the \code{hypers} argument take the value that they have in the passed model.
-#' Parallel computation increases the speed only for large datasets due to the
-#' time necessary to create the cluster.
+#' @details * To know which hyperparameters can be tuned you can use the output
+#' of the function \code{\link{get_tunable_args}}. Hyperparameters not included
+#' in the \code{hypers} argument take the value that they have in the passed
+#' model.
+#' * Parallel computation is used only during the execution of the predict
+#' function, and increases the speed only for large datasets. For small dataset
+#' it may result in a longer execution, due to the time necessary to create the
+#' cluster.
 #'
 #' @return code{\linkS4class{SDMtune}} object.
 #' @export
@@ -77,17 +78,8 @@
 #'                      save_models = FALSE)
 #' output@results
 #' }
-gridSearch <- function(model, hypers, metric, test = NULL, bg4test = NULL,
-                       env = NULL, parallel = FALSE, save_models = TRUE,
-                       seed = NULL) {
-
-  # TODO remove it next release
-  if (!is.null(bg4test))
-    warning("Argument \"bg4test\" is deprecated and ignored, it will be ",
-            "removed in the next release.")
-  if (!is.null(seed))
-    warning("Argument \"seed\" is deprecated and ignored, it will be ",
-            "removed in the next release.")
+gridSearch <- function(model, hypers, metric, test = NULL, env = NULL,
+                       parallel = FALSE, save_models = TRUE) {
 
   metric <- match.arg(metric, choices = c("auc", "tss", "aicc"))
   # Create a grid with all the possible combination of hyperparameters

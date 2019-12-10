@@ -3,16 +3,6 @@ skip_on_cran()
 train <- SDMtune:::t
 folds <- randomFolds(train, k = 2)
 
-# TODO Remove this with next release
-test_that("Error and warnings are raised", {
-  expect_error(train("Maxnet", p = train, a = train, rep = 2),
-               "Argument \"p\" and \"a\" are deprecated, use \"data\" instead.")
-  expect_warning(train("Maxnet", data = train, rep = 2, fc = "l"),
-                 "is deprecated")
-  expect_warning(train("Maxnet", data = train, fc = "l", seed = 25),
-                 "is deprecated")
-})
-
 test_that("Cross validation is executed", {
   cv <- train("Maxnet", data = train, folds = folds, fc = "l")
   expect_s4_class(cv, "SDMmodelCV")
@@ -35,4 +25,14 @@ test_that("Train multiple methods creates the correct output", {
                NA)
   expect_type(m, "list")
   expect_named(m, c("Maxnet", "ANN"))
+  # Maxent model
+  expect_s4_class(m$Maxnet, "SDMmodel")
+  expect_s4_class(m$Maxnet@model, "Maxnet")
+  expect_equal(m$Maxnet@model@fc, "l")
+  expect_equal(m$Maxnet@model@reg, 1)
+  # ANN model
+  expect_s4_class(m$ANN, "SDMmodel")
+  expect_s4_class(m$ANN@model, "ANN")
+  expect_equal(m$ANN@model@size, 2)
+  expect_equal(m$ANN@model@maxit, 100)
 })
