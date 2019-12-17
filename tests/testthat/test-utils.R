@@ -1,3 +1,6 @@
+skip_on_cran()
+skip_on_appveyor()
+
 data <- SDMtune:::t
 model <- SDMtune:::bm_maxnet
 model_mx <- SDMtune:::bm_maxent
@@ -137,7 +140,7 @@ test_that(".get_train_args", {
                c("data", "method", "fc", "reg"))
   # The output is correct using maxent
   expect_named(.get_train_args(model_mx),
-               c("data", "method", "fc", "reg", "iter", "extra_args"))
+               c("data", "method", "fc", "reg", "iter"))
   # The output is correct using ann
   expect_named(.get_train_args(model_ann),
                c("data", "method", "size", "decay", "rang", "maxit"))
@@ -229,7 +232,7 @@ test_that("The function .check_optimize_hypers raises exceptions", {
 test_that("The function .args_name", {
   expect_vector(.args_name("trainANN"), ptype = character(), size = 5)
   expect_vector(.args_name("trainBRT"), ptype = character(), size = 6)
-  expect_vector(.args_name("trainMaxent"), ptype = character(), size = 5)
+  expect_vector(.args_name("trainMaxent"), ptype = character(), size = 4)
   expect_vector(.args_name("trainMaxnet"), ptype = character(), size = 3)
   expect_vector(.args_name("trainRF"), ptype = character(), size = 4)
 })
