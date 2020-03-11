@@ -26,12 +26,7 @@
 #' software.
 #'
 #' @export
-#' @importFrom utils menu
-#' @importFrom crayon red green
-#' @importFrom cli symbol rule
-#' @importFrom utils browseURL
-#' @importFrom htmltools HTML
-#' @import kableExtra
+#' @importFrom utils menu browseURL
 #'
 #' @author Sergio Vignali
 #'
@@ -66,6 +61,30 @@
 modelReport <- function(model, folder, test = NULL, type = NULL,
                         response_curves = FALSE, only_presence = FALSE,
                         jk = FALSE, env = NULL, clamp = TRUE, permut = 10) {
+
+  if (!requireNamespace("kableExtra", quietly = TRUE)) {
+    stop("You need the packege \"kableExtra\" to run this function,",
+         " please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("cli", quietly = TRUE)) {
+    stop("You need the packege \"cli\" to run this function,",
+         " please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("crayon", quietly = TRUE)) {
+    stop("You need the packege \"crayon\" to run this function,",
+         " please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("htmltools", quietly = TRUE)) {
+    stop("You need the packege \"htmltools\" to run this function,",
+         " please install it.",
+         call. = FALSE)
+  }
 
   if (file.exists(paste0(getwd(), "/", folder))) {
     msg <- message(crayon::red(cli::symbol$fancy_question_mark),
