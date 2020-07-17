@@ -1,21 +1,19 @@
 #' SDMmodelCV
 #'
-#' This Class represents a SDMmodel model object with replicates and hosts all
+#' This Class represents an SDMmodel model object with replicates and hosts all
 #' the models trained during the cross validation.
 #'
 #' @slot models list. A list containing all the models trained during the cross
 #' validation.
-#' @slot data \code{\linkS4class{SWD}} object. Full dataset used to make the
+#' @slot data \linkS4class{SWD} object. Full dataset used to make the
 #' partitions.
 #' @slot folds list with two matrices, the first for the training and the second
 #' for the testing dataset. Each column of one matrix represents a fold with
-#' \code{TRUE} for the locations included in and \code{FALSE} excluded from the
-#' partition.
+#' `TRUE` for the locations included in and `FALSE` excluded from the partition.
 #'
+#' @aliases NULL SDMmodelCV-class
 #' @include SWD-class.R
-#' @name SDMmodelCV-class
-#' @rdname SDMmodelCV-class
-#' @exportClass SDMmodelCV
+#' @export
 #'
 #' @author Sergio Vignali
 SDMmodelCV <- setClass("SDMmodelCV",
@@ -31,7 +29,7 @@ setMethod(
   signature = "SDMmodelCV",
   definition = function(object) {
 
-    tunable_hypers <- get_tunable_args(object@models[[1]])
+    tunable_hypers <- getTunableArgs(object@models[[1]])
     cont_vars <- names(Filter(is.numeric, object@data@data))
     if (length(cont_vars) == 0)
       cont_vars <- NA
@@ -50,9 +48,9 @@ setMethod(
     cat("Model configurations:\n")
     cat("--------------------\n")
 
-    for (i in 1:length(tunable_hypers)) {
+    for (i in seq_along(tunable_hypers)) {
       if (tunable_hypers[i] == "a") {
-        next()
+        next
       } else {
         h <- slot(object@models[[1]]@model, tunable_hypers[i])
         cat(tunable_hypers[i], ": ", h, "\n", sep = "")

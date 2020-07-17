@@ -10,11 +10,11 @@ train(method, data, folds = NULL, verbose = TRUE, ...)
 \item{method}{character or character vector. Method used to train the model,
 possible values are "ANN", "BRT", "Maxent", "Maxnet" or "RF", see details.}
 
-\item{data}{\code{\linkS4class{SWD}} object with presence and
-absence/background locations.}
+\item{data}{\linkS4class{SWD} object with presence and absence/background
+locations.}
 
-\item{folds}{list. Output of the function \code{\link{randomFolds}} or folds
-object created with other packages, see details, default is \code{NULL}.}
+\item{folds}{list. Output of the function \link{randomFolds} or folds object
+created with other packages, see details, default is \code{NULL}.}
 
 \item{verbose}{logical, if \code{TRUE} shows a progress bar during cross
 validation, default is \code{TRUE}.}
@@ -22,9 +22,8 @@ validation, default is \code{TRUE}.}
 \item{...}{Arguments passed to the relative method, see details.}
 }
 \value{
-An \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-or a list of model objects.
-object.
+An \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} or a list of
+model objects.
 }
 \description{
 Train a model using one of the following methods: Artificial Neural Networks,
@@ -33,7 +32,7 @@ Boosted Regression Trees, Maxent, Maxnet or Random Forest.
 \details{
 \itemize{
 \item For the ANN method possible arguments are (for more details see
-\code{\link[nnet]{nnet}}):
+\link[nnet]{nnet}):
 \itemize{
 \item size: integer. Number of the units in the hidden layer.
 \item decay numeric. Weight decay, default is 0.
@@ -41,7 +40,7 @@ Boosted Regression Trees, Maxent, Maxnet or Random Forest.
 \item maxit integer. Maximum number of iterations, default is 100.
 }
 \item For the BRT method possible arguments are (for more details see
-\code{\link[gbm]{gbm}}):
+\link[gbm]{gbm}):
 \itemize{
 \item distribution: character. Name of the distribution to use, default is
 "bernoulli".
@@ -53,18 +52,18 @@ expansion, default is 0.5.
 }
 \item For the RF method the model is trained as classification. Possible
 arguments are (for more details see
-\code{\link[randomForest]{randomForest}}):
+\link[randomForest]{randomForest}):
 \itemize{
 \item mtry: integer. Number of variable randomly sampled at each split,
-default is \code{floor(sqrt(number of variables))}.
+default is \verb{floor(sqrt(number of variables))}.
 \item ntree: integer. Number of tree to grow, default is 500.
-\item nodesize: integer. Minimum size of terminal nodes.
+\item nodesize: integer. Minimum size of terminal nodes, default is 1.
 }
 \item Maxent models are trained using the arguments
 \code{"removeduplicates=false"} and \code{"addsamplestobackground=false"}.
-Use the function \code{\link{thinData}} to remove duplicates and the function
-\code{\link{addSamplesToBg}} to add presence locations to background
-locations. For the Maxent method, possible arguments are:
+Use the function \link{thinData} to remove duplicates and the function
+\link{addSamplesToBg} to add presence locations to background locations. For
+the Maxent method, possible arguments are:
 \itemize{
 \item reg: numeric. The value of the regularization multiplier, default is 1.
 \item fc: character. The value of the feature classes, possible values are
@@ -73,7 +72,7 @@ combinations of "l", "q", "p", "h" and "t", default is "lqph".
 default is 500.
 }
 \item For the Maxnet method, possible arguments are (for more details see
-\code{\link[maxnet]{maxnet}}):
+\link[maxnet]{maxnet}):
 \itemize{
 \item reg: numeric. The value of the regularization intensity, default is 1.
 \item fc: character. The value of the feature classes, possible values are
@@ -85,9 +84,9 @@ The folds argument accepts also objects created with other packages:
 \pkg{ENMeval} or \pkg{blockCV}. In this case the function converts
 internally the folds into a format valid for \pkg{SDMtune}.
 
-When multiple methods are given as \code{method} argument, the function
-returns a named list of model object, with the name corresponding to the
-used method, see examples.
+When multiple methods are given as \code{method} argument, the function returns a
+named list of model object, with the name corresponding to the used method,
+see examples.
 }
 \examples{
 \donttest{
@@ -105,12 +104,17 @@ data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
                    env = predictors, categorical = "biome")
 
 ## Train a Maxent model
+# The next line checks if Maxent is correctly configured but you don't need
+# to run it in your script
+if (checkMaxentInstallation(verbose = FALSE)) {
 model <- train(method = "Maxent", data = data, fc = "l", reg = 1.5,
                iter = 700)
+
 # Add samples to background. This should be done preparing the data before
 # training the model without using
 data <- addSamplesToBg(data)
 model <- train("Maxent", data = data)
+}
 
 ## Train a Maxnet model
 model <- train(method = "Maxnet", data = data, fc = "lq", reg = 1.5)
@@ -121,8 +125,10 @@ folds <- randomFolds(data, k = 4, only_presence = TRUE)
 model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
                folds = folds)
 
+\dontrun{
+# Run only if you have the package ENMeval installed
 ## Block partition using the ENMeval package
-# library(ENMeval)
+require(ENMeval)
 block_folds <- get.block(occ = data@coords[data@pa == 1, ],
                          bg.coords = data@coords[data@pa == 0, ])
 model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
@@ -137,7 +143,8 @@ model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
                folds = cb_folds)
 
 ## Environmental block using the blockCV package
-# library(blockCV)
+# Run only if you have the package blockCV
+require(blockCV)
 # Create spatial points data frame
 library(raster)
 sp_df <- SpatialPointsDataFrame(data@coords, data = as.data.frame(data@pa),
@@ -147,10 +154,10 @@ e_folds <- envBlock(rasterLayer = predictors,
                     species = "data@pa",
                     k = 4,
                     standardization = "standard",
-                    rasterBlock = FALSE,
-                    numLimit = 100)
+                    rasterBlock = FALSE)
 model <- train(method = "Maxnet", data = data, fc = "l", reg = 0.8,
                folds = e_folds)
+}
 
 ## Train presence absence models
 # Prepare presence and absence locations
@@ -178,6 +185,7 @@ output$RF
 ## Multiple methods trained together passing extra arguments
 output <- train(method = c("ANN", "BRT", "RF"), data = data, size = 10,
                 ntree = 300, n.trees = 300, shrinkage = 0.001)
+output
 }
 }
 \references{
@@ -208,7 +216,7 @@ Roozbeh Valavi, Jane Elith, José Lahoz-Monfort and Gurutzeta Guillera-Arroita
 cross-validation. \url{https://github.com/rvalavi/blockCV}.
 }
 \seealso{
-\code{\link{randomFolds}}
+\link{randomFolds}.
 }
 \author{
 Sergio Vignali

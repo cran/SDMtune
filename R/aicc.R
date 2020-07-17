@@ -3,25 +3,24 @@
 #' Compute the Akaike Information Criterion corrected for small samples size
 #' (Warren and Seifert, 2011).
 #'
-#' @param model \code{\linkS4class{SDMmodel}} object.
-#' @param env \code{\link[raster]{stack}} containing the environmental
+#' @param model \linkS4class{SDMmodel} object.
+#' @param env \link[raster]{stack} containing the environmental
 #' variables.
-#' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}.
+#' @param parallel deprecated.
 #'
 #' @details The function is available only for **Maxent** and **Maxnet**
-#' methods. Parallel computation increases the speed only for large datasets due
-#' to the time necessary to create the cluster.
+#' methods.
 #'
 #' @return The computed AICc
 #' @export
-#' @importFrom raster extract cellStats
 #'
 #' @author Sergio Vignali
 #'
 #' @references Warren D.L., Seifert S.N., (2011). Ecological niche modeling in
 #' Maxent: the importance of model complexity and the performance of model
 #' selection criteria. Ecological Applications, 21(2), 335–342.
+#'
+#' @seealso \link{auc} and \link{tss}.
 #'
 #' @examples
 #' # Acquire environmental variables
@@ -42,14 +41,12 @@
 #'
 #' # Compute the AICc
 #' aicc(model, predictors)
-#'
-#' \donttest{
-#' # Compute the AICc using parallel computation. This reduces the time only for
-#' # large datasets, in this case it takes longer than the previous example due
-#' # to the time used to start and stop a cluster
-#' aicc(model, predictors, parallel = TRUE)
-#' }
-aicc <- function(model, env, parallel = FALSE){
+aicc <- function(model, env, parallel = FALSE) {
+
+  # TODO remove this code in a next release
+  if (parallel)
+    warning("parallel argument is deprecated and not used anymore",
+            call. = FALSE, immediate. = TRUE)
 
   if (!class(model@model) %in% c("Maxent", "Maxnet"))
     stop("AICc available only for \"Maxent\" and \"Maxnet\" methods.")
@@ -66,7 +63,7 @@ aicc <- function(model, env, parallel = FALSE){
   if (k > sum(model@data@pa == 1)) {
     aicc <- NA
   } else {
-    raw <- predict(model, env, type = type, parallel = parallel)
+    raw <- predict(model, env, type = type)
     raw_sum <- raster::cellStats(raw, sum)
     values <- raster::extract(raw, model@data@coords[model@data@pa == 1, ])
     # log-likelihood of standardized presence probabilities

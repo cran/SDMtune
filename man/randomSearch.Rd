@@ -4,12 +4,19 @@
 \alias{randomSearch}
 \title{Random Search}
 \usage{
-randomSearch(model, hypers, metric, test = NULL, pop = 20,
-  env = NULL, parallel = FALSE, seed = NULL)
+randomSearch(
+  model,
+  hypers,
+  metric,
+  test = NULL,
+  pop = 20,
+  env = NULL,
+  parallel = FALSE,
+  seed = NULL
+)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
 \item{hypers}{named list containing the values of the hyperparameters that
 should be tuned, see details.}
@@ -17,23 +24,22 @@ should be tuned, see details.}
 \item{metric}{character. The metric used to evaluate the models, possible
 values are: "auc", "tss" and "aicc".}
 
-\item{test}{\code{\linkS4class{SWD}} object. Test dataset used to evaluate
-the model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
+\item{test}{\linkS4class{SWD} object. Test dataset used to evaluate the
+model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
 default is \code{NULL}.}
 
 \item{pop}{numeric. Size of the population, default is 20.}
 
-\item{env}{\code{\link[raster]{stack}} containing the environmental
-variables, used only with "aicc", default is \code{NULL}.}
+\item{env}{\link[raster]{stack} containing the environmental variables, used
+only with "aicc", default is \code{NULL}.}
 
-\item{parallel}{logical, if \code{TRUE} it uses parallel computation, default
-is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.}
+\item{parallel}{deprecated.}
 
 \item{seed}{numeric. The value used to set the seed to have consistent
 results, default is \code{NULL}.}
 }
 \value{
-\code{\linkS4class{SDMtune}} object.
+\linkS4class{SDMtune} object.
 }
 \description{
 The function performs a random search in the hyperparameters space, creating
@@ -43,13 +49,8 @@ provided hyperparameters values.
 \details{
 \itemize{
 \item To know which hyperparameters can be tuned you can use the output
-of the function \code{\link{get_tunable_args}}. Hyperparameters not included
-in the \code{hypers} argument take the value that they have in the passed
-model.
-\item Parallel computation is used only during the execution of the predict
-function, and increases the speed only for large datasets. For small dataset
-it may result in a longer execution, due to the time necessary to create the
-cluster.
+of the function \link{getTunableArgs}. Hyperparameters not included in the
+\code{hypers} argument take the value that they have in the passed model.
 }
 }
 \examples{
@@ -83,7 +84,7 @@ output <- randomSearch(model, hypers = h, metric = "auc", test = test,
                        pop = 10, seed = 25)
 output@results
 output@models
-# Order rusults by highest test AUC
+# Order results by highest test AUC
 output@results[order(-output@results$test_AUC), ]
 }
 }

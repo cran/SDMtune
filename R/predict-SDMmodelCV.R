@@ -1,64 +1,58 @@
 #' Predict for Cross Validation
 #'
-#' Predict the output for a new dataset given a trained \code{\link{SDMmodelCV}}
+#' Predict the output for a new dataset given a trained \linkS4class{SDMmodelCV}
 #' model. The output is given as the provided function applied to the prediction
 #' of the k models.
 #'
-#' @param object \code{\linkS4class{SDMmodelCV}} object.
-#' @param data data.frame, \code{\linkS4class{SWD}} or raster
-#' \code{\link[raster]{stack}} with the data for the prediction.
+#' @param object \linkS4class{SDMmodelCV} object.
+#' @param data data.frame, \linkS4class{SWD} or raster \link[raster]{stack} with
+#' the data for the prediction.
 #' @param fun character. function used to combine the output of the k models,
-#' default is \code{"mean"}. Note that fun is a character argument, you must use
-#' \code{"mean"} and not \code{mean}. You can also pass a vector of character
-#' containing multiple function names, see details.
+#' default is `"mean"`. Note that fun is a character argument, you must use
+#' `"mean"` and not `mean`. You can also pass a vector of character containing
+#' multiple function names, see details.
 #' @param type character. Output type, see details, used only for **Maxent** and
-#' **Maxnet** methods, default is \code{NULL}.
+#' **Maxnet** methods, default is `NULL`.
 #' @param clamp logical for clumping during prediction, used only for **Maxent**
-#' and **Maxnet** methods, default is \code{TRUE}.
+#' and **Maxnet** methods, default is `TRUE`.
 #' @param filename character. Output file name for the prediction map, used only
-#' when \code{data} is a \code{\link[raster]{stack}} object. If provided the
-#' output is saved in a file, see details.
-#' @param format character. The output format, see
-#' \code{\link[raster]{writeRaster}} for all the options, default is "GTiff".
-#' @param extent \code{\link[raster]{Extent}} object, if provided it restricts
-#' the prediction to the given extent, default is \code{NULL}.
-#' @param parallel logical to use parallel computation during prediction,
-#' default is \code{FALSE}.
-#' @param ... Additional arguments to pass to the
-#' \code{\link[raster]{writeRaster}} function.
+#' when `data` is a \link[raster]{stack} object. If provided the output is saved
+#' in a file, see details.
+#' @param format character. The output format, see \link[raster]{writeRaster}
+#' for all the options, default is "GTiff".
+#' @param extent \link[raster]{extent} object, if provided it restricts the
+#' prediction to the given extent, default is `NULL`.
+#' @param parallel deprecated.
+#' @param ... Additional arguments to pass to the \link[raster]{writeRaster}
+#' function.
 #'
 #' @details
-#' * filename, format, extent, parallel and ... arguments are used only when the
-#' prediction is done for a \code{\link[raster]{stack}} object.
-#' * When a character vector is passed to the \code{fun} argument, than all the
+#' * filename, format, extent, and ... arguments are used only when the
+#' prediction is done for a \link[raster]{stack} object.
+#' * When a character vector is passed to the `fun` argument, than all the
 #' given functions are applied and a named list is returned, see examples.
-#' * When \code{filename} is provided and the \code{fun} argument contains more
-#' than one function name, the saved files are named as
-#' **\code{filename}_\code{fun}**, see example.
-#' * For models trained with the **Maxent** method the argument \code{type} can
-#' be: "raw", "logistic" and "cloglog". The function performs the prediction in
+#' * When `filename` is provided and the `fun` argument contains more than one
+#' function name, the saved files are named as `filename_fun`, see example.
+#' * For models trained with the **Maxent** method the argument `type` can be:
+#' "raw", "logistic" and "cloglog". The function performs the prediction in
 #' **R** without calling the **MaxEnt** Java software. This results in a faster
-#' computation for large datasets. The results might differ slightly from the
-#' Java software output.
-#' * For models trained with the **Maxnet** method the argument \code{type} can
-#' be: "link", "exponential", "logistic" and "cloglog", see
-#' \code{\link[maxnet]{maxnet}} for more details.
+#' computation for large datasets and might result in a slightly different
+#' output compared to the Java software.
+#' * For models trained with the **Maxnet** method the argument `type` can be:
+#' "link", "exponential", "logistic" and "cloglog", see \link[maxnet]{maxnet}
+#' for more details.
 #' * For models trained with the **ANN** method the function uses the "raw"
 #' output type.
 #' * For models trained with the **RF** method the output is the probability of
 #' class 1.
 #' * For models trained with the **BRT** method the function uses the number of
 #' trees defined to train the model and the "response" output type.
-#' * Parallel computation increases the speed only for large datasets due to the
-#' time necessary to create the cluster.
 #'
 #' @include SDMmodelCV-class.R
-#' @importFrom raster beginCluster clusterR endCluster calc
-#' @importFrom progress progress_bar
 #'
-#' @return A vector with the prediction or a \code{\link[raster]{raster}} object
-#' if data is a raster \code{\link[raster]{stack}} or a list in the case of
-#' multiple functions.
+#' @return A vector with the prediction or a \link[raster]{raster} object if
+#' data is a raster \link[raster]{stack} or a list in the case of multiple
+#' functions.
 #' @exportMethod predict
 #'
 #' @author Sergio Vignali
@@ -92,6 +86,8 @@
 #' # Make cloglog prediction for the all study area, get the average, standard
 #' # deviation, and maximum values of the k models, and save the output in three
 #' # files
+#' \dontrun{
+#' # The following commands save the output in the working directory
 #' maps <- predict(model, data = predictors, fun = c("mean", "sd", "max"),
 #'                 type = "cloglog", filename = "prediction")
 #' # In this case three files are created: prediction_mean.tif,
@@ -103,15 +99,20 @@
 #'
 #' # Make logistic prediction for the all study area, given as standard
 #' # deviation of the k models, and save it in a file
-#' predict(model, data = predictors, fun = sd, type = "logistic",
+#' predict(model, data = predictors, fun = "sd", type = "logistic",
 #'         filename = "my_map")
+#' }
 #' }
 setMethod(
   "predict", signature = "SDMmodelCV",
   definition = function(object, data, fun = "mean", type = NULL,
                         clamp = TRUE, filename = "", format = "GTiff",
                         extent = NULL, parallel = FALSE, ...) {
-    on.exit(.end_parallel())
+
+    # TODO remove this code in a next release
+    if (parallel)
+      warning("parallel argument is deprecated and not used anymore",
+              call. = FALSE, immediate. = TRUE)
 
     k <- length(object@models)
     l <- length(fun)
@@ -133,35 +134,18 @@ setMethod(
     if (inherits(data, "Raster")) {
       preds <- vector("list", length = k)
 
-      if (parallel) {
-        suppressMessages(raster::beginCluster())
-        options(SDMtuneParallel = TRUE)
-      }
-
       for (i in 1:k) {
-        preds[[i]] <- predict(object@models[[i]], data = data,
-                              type = type, clamp = clamp,
-                              extent = extent, parallel = parallel)
+        preds[[i]] <- predict(object@models[[i]], data = data, type = type,
+                              clamp = clamp, extent = extent)
         pb$tick(1)
       }
       preds <- raster::stack(preds)
 
-      if (parallel) {
-        for (i in 1:l) {
-          output[[i]] <- raster::clusterR(preds, fun = raster::calc,
-                                          args = list(fun = get(fun[i]),
-                                                      filename = filename[i],
-                                                      format = format, ...))
-          pb$tick(1)
-        }
-
-      } else {
-        for (i in 1:l) {
-          output[[i]] <- raster::calc(preds, fun = get(fun[i]),
-                                      filename = filename[i], format = format,
-                                      ...)
-          pb$tick(1)
-        }
+      for (i in 1:l) {
+        output[[i]] <- raster::calc(preds, fun = get(fun[i]),
+                                    filename = filename[i], format = format,
+                                    ...)
+        pb$tick(1)
       }
     } else {
       if (class(data) == "SWD")

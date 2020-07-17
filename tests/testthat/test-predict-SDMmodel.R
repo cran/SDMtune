@@ -1,5 +1,4 @@
 skip_on_cran()
-skip_on_appveyor()
 
 m <- SDMtune:::bm_maxent
 m1 <- SDMtune:::bm_maxnet
@@ -25,12 +24,6 @@ test_that("The method works with SWD objects", {
 
 test_that("The method works with raster stack objects", {
   p <- predict(m, predictors, "raw")
-  expect_length(p, predictors$bio1@ncols * predictors$bio1@nrows)
-  expect_s4_class(p, "RasterLayer")
-})
-
-test_that("The method works with raster stack objects and parallel", {
-  p <- predict(m, predictors, "raw", parallel = TRUE)
   expect_length(p, predictors$bio1@ncols * predictors$bio1@nrows)
   expect_s4_class(p, "RasterLayer")
 })

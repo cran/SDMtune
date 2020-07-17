@@ -1,5 +1,4 @@
 skip_on_cran()
-skip_on_appveyor()
 
 test_that("The ouput is correct", {
   data <- SDMtune:::t
@@ -9,4 +8,3 @@ test_that("The ouput is correct", {
   expect_equal(sum(pred >= 0), nrow(data@data))
   expect_equal(sum(pred <= 1), nrow(data@data))
 })
-

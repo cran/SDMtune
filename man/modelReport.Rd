@@ -4,33 +4,41 @@
 \alias{modelReport}
 \title{Model Report}
 \usage{
-modelReport(model, folder, test = NULL, type = NULL,
-  response_curves = FALSE, only_presence = FALSE, jk = FALSE,
-  env = NULL, clamp = TRUE, permut = 10)
+modelReport(
+  model,
+  folder,
+  test = NULL,
+  type = NULL,
+  response_curves = FALSE,
+  only_presence = FALSE,
+  jk = FALSE,
+  env = NULL,
+  clamp = TRUE,
+  permut = 10
+)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} object.}
+\item{model}{\linkS4class{SDMmodel} object.}
 
 \item{folder}{character. The name of the folder in which to save the output.
 The folder is created in the working directory.}
 
-\item{test}{\code{\linkS4class{SWD}} object with the test locations, default
-is \code{NULL}.}
+\item{test}{\linkS4class{SWD} object with the test locations, default is
+\code{NULL}.}
 
 \item{type}{character. The output type used for "Maxent" and "Maxnet"
 methods, possible values are "cloglog" and "logistic", default is
 \code{NULL}.}
 
-\item{response_curves}{logical, if \code{TRUE} it plots the response curves
-in the html output, default is \code{FALSE}.}
+\item{response_curves}{logical, if \code{TRUE} it plots the response curves in the
+html output, default is \code{FALSE}.}
 
 \item{only_presence}{logical, if \code{TRUE} it uses only the range of the
 presence location for the marginal response, default is \code{FALSE}.}
 
-\item{jk}{logical, if \code{TRUE} it runs the jackknife test, default
-\code{FALSE}.}
+\item{jk}{logical, if \code{TRUE} it runs the jackknife test, default is \code{FALSE}.}
 
-\item{env}{\code{\link[raster]{stack}}. If provided it computes and adds a
+\item{env}{\link[raster]{stack}. If provided it computes and adds a
 prediction map to the output, default is \code{NULL}.}
 
 \item{clamp}{logical for clumping during prediction, used for response curves
@@ -47,6 +55,8 @@ software.
 }
 \examples{
 \donttest{
+# If you run the following examples with the function example(), you may want
+# to set the argument ask like following: example("modelReport", ask = FALSE)
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
                     pattern = "grd", full.names = TRUE)
@@ -66,12 +76,14 @@ train <- datasets[[1]]
 test <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxent", data = train, fc = "l")
+model <- train(method = "Maxnet", data = train, fc = "lq")
 
 # Create the report
+\dontrun{
 modelReport(model, type = "cloglog", folder = "my_folder", test = test,
             response_curves = TRUE, only_presence = TRUE, jk = TRUE,
-            env = predictors)
+            env = predictors, permut = 2)
+}
 }
 }
 \author{

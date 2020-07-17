@@ -3,21 +3,19 @@
 #' The function uses a Genetic Algorithm implementation to optimize the model
 #' hyperparameter configuration according to the chosen metric.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #' @param hypers named list containing the values of the hyperparameters that
 #' should be tuned, see details.
 #' @param metric character. The metric used to evaluate the models, possible
 #' values are: "auc", "tss" and "aicc".
-#' @param test \code{\linkS4class{SWD}} object. Test dataset used to evaluate
-#' the model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
-#' default is \code{NULL}.
+#' @param test \linkS4class{SWD} object. Testing dataset used to evaluate
+#' the model, not used with aicc and \linkS4class{SDMmodelCV} objects, default
+#' is `NULL`.
 #' @param pop numeric. Size of the population, default is 5.
 #' @param gen numeric. Number of generations, default is 20.
-#' @param env \code{\link[raster]{stack}} containing the environmental
-#' variables, used only with "aicc", default is \code{NULL}.
-#' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.
+#' @param env \link[raster]{stack} containing the environmental variables, used
+#' only with "aicc", default is `NULL`.
+#' @param parallel deprecated.
 #' @param keep_best numeric. Percentage of the best models in the population to
 #' be retained during each iteration, expressed as decimal number. Default
 #' is 0.4.
@@ -26,27 +24,20 @@
 #' @param mutation_chance numeric. Probability of mutation of the child models,
 #' expressed as decimal number. Default is 0.4.
 #' @param seed numeric. The value used to set the seed to have consistent
-#' results, default is \code{NULL}.
+#' results, default is `NULL`.
 #'
 #' @details To know which hyperparameters can be tuned you can use the output
-#' of the function \code{\link{get_tunable_args}}. Hyperparameters not included
-#' in the \code{hypers} argument take the value that they have in the passed
-#' model.
-#' * Parallel computation is used only during the execution of the predict
-#' function, and increases the speed only for large datasets. For small dataset
-#' it may result in a longer execution, due to the time necessary to create the
-#' cluster.
+#' of the function \link{getTunableArgs}. Hyperparameters not included in the
+#' `hypers` argument take the value that they have in the passed model.
 #' * Part of the code is inspired by
 #' \href{https://blog.coast.ai/lets-evolve-a-neural-network-with-a-geneticalgorithm-code-included-8809bece164}{this post}.
 #'
-#' @return \code{\linkS4class{SDMtune}} object.
+#' @return \linkS4class{SDMtune} object.
 #' @export
-#' @importFrom progress progress_bar
-#' @importFrom stats runif
 #'
 #' @author Sergio Vignali
 #'
-#' @seealso \code{\link{gridSearch}} and \code{\link{randomSearch}}.
+#' @seealso \link{gridSearch} and \link{randomSearch}.
 #'
 #' @examples
 #' \donttest{
@@ -64,27 +55,36 @@
 #'                    env = predictors, categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+#' datasets <- trainValTest(data, val = 0.2, test = 0.2, only_presence = TRUE,
+#'                          seed = 61516)
 #' train <- datasets[[1]]
-#' test <- datasets[[2]]
+#' val <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxent", data = train, fc = "l")
+#' model <- train("Maxnet", data = train)
 #'
 #' # Define the hyperparameters to test
-#' h <- list(reg = 1:3, fc = c("lqp", "lqph", "lh"), iter = seq(300, 700, 100))
+#' h <- list(reg = seq(0.2, 5, 0.2),
+#'           fc = c("l", "lq", "lh", "lp", "lqp", "lqph"))
 #'
 #' # Run the function using as metric the AUC
-#' output <- optimizeModel(model, hypers = h, metric = "auc", test = test,
-#'                         seed = 25)
+#' \dontrun{
+#' output <- optimizeModel(model, hypers = h, metric = "auc", test = val,
+#'                         pop = 15, gen = 2, seed = 798)
 #' output@results
 #' output@models
 #' output@models[[1]]  # Best model
+#' }
 #' }
 optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
                           env = NULL, parallel = FALSE, keep_best = 0.4,
                           keep_random = 0.2, mutation_chance = 0.4,
                           seed = NULL) {
+
+  # TODO remove this code in a next release
+  if (parallel)
+    warning("parallel argument is deprecated and not used anymore",
+            call. = FALSE, immediate. = TRUE)
 
   metric <- match.arg(metric, choices = c("auc", "tss", "aicc"))
 
@@ -122,7 +122,7 @@ optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
   scatter_footer <- vector("character", length = pop)
   best_train <- rep(NA_real_, gen + 2)
   best_val <- rep(NA_real_, gen + 2)
-  best_train[1] <- .get_metric(metric, model, env = env, parallel = parallel)
+  best_train[1] <- .get_metric(metric, model, env = env)
   if (metric != "aicc") {
     best_val[1] <- .get_metric(metric, model, test = test)
   } else {
@@ -163,8 +163,7 @@ optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
 
     models[[i]] <- .create_model_from_settings(model, grid[index[i], ])
 
-    train_metric[i, ] <- list(i, .get_metric(metric, models[[i]], env = env,
-                                             parallel = parallel))
+    train_metric[i, ] <- list(i, .get_metric(metric, models[[i]], env = env))
     if (metric != "aicc")
       val_metric[i, ] <- list(i, .get_metric(metric, models[[i]], test))
     scatter_footer[i] <- .get_footer(models[[i]])
@@ -206,7 +205,7 @@ optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
   # Optimize using Genetic Algorithm
   if (gen > 0) {
     for (i in 1:gen) {
-      index_kept <- c(1:kept_good, sample( (kept_good + 1):pop, kept_bad))
+      index_kept <- c(1:kept_good, sample((kept_good + 1):pop, kept_bad))
       train_metric <- train_metric[index_kept, ]
       train_metric$x <- 1:kept
       if (metric != "aicc") {
@@ -233,8 +232,7 @@ optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
         father <- couple[[2]]
         child <- .breed(mother, father, hypers, mutation_chance)
         train_metric[kept + j, ] <- list(kept + j,
-                                         .get_metric(metric, child, env = env,
-                                                     parallel = parallel))
+                                         .get_metric(metric, child, env = env))
         if (metric != "aicc")
           val_metric[kept + j, ] <- list(kept + j, .get_metric(metric, child,
                                                                test))
@@ -306,7 +304,7 @@ optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
                                 size = 1)[[1]]
   }
   # Mutation
-  if (mutation_chance > runif(1)) {
+  if (mutation_chance > stats::runif(1)) {
     # Only hypers with more than two values can be use for mutation
     mutation <- sample(names(hypers)[lengths(hypers) > 2], size = 1)
     options <- setdiff(hypers[[mutation]], c(mother_args[[mutation]],
@@ -323,7 +321,8 @@ optimizeModel <- function(model, hypers, metric, test = NULL, pop = 20, gen = 5,
 .check_optimize_args <- function(hypers, grid, pop) {
 
   if (sum(lengths(hypers) > 2) < 1)
-    stop("One hyperparameter in hypers should have more than two values to allow crossover!")
+    stop("One hyperparameter in hypers should have more than two values to ",
+         "allow crossover!")
 
   if (length(names(hypers)) < 2) {
     stop(paste("You must provide at least two hyperparameters to be tuned!",

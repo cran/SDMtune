@@ -1,18 +1,18 @@
 # Get presence locations from an SWD object
 .get_presence <- function(swd) {
-  return(swd@data[swd@pa == 1,, drop = FALSE])
+  return(swd@data[swd@pa == 1, , drop = FALSE])
 }
 
 # Get absence locations from an SWD object
 .get_absence <- function(swd) {
-  return(swd@data[swd@pa == 0,, drop = FALSE])
+  return(swd@data[swd@pa == 0, , drop = FALSE])
 }
 
 # Subset an SWD object using the fold partition
 .subset_swd <- function(swd, fold) {
 
-  data <- swd@data[fold,, drop = FALSE]
-  coords <- swd@coords[fold,, drop = FALSE]
+  data <- swd@data[fold, , drop = FALSE]
+  coords <- swd@coords[fold, , drop = FALSE]
   rownames(data) <- NULL
   rownames(coords) <- NULL
   pa <- swd@pa[fold]
@@ -45,9 +45,9 @@
 
 .get_footer <- function(model) {
   footer <- c()
-  tuned_args <- .get_train_args(model)[get_tunable_args(model)]
+  tuned_args <- .get_train_args(model)[getTunableArgs(model)]
 
-  for (i in 1:length(tuned_args)) {
+  for (i in seq_along(tuned_args)) {
     footer <- c(footer, paste0(names(tuned_args)[i], ": ", tuned_args[[i]]))
   }
 
@@ -59,14 +59,13 @@
   return(tot)
 }
 
-.get_metric <- function(metric, model, test = NULL, env = NULL,
-                        parallel = FALSE) {
+.get_metric <- function(metric, model, test = NULL, env = NULL) {
   if (metric == "auc") {
     return(auc(model, test))
   } else if (metric == "tss") {
     return(tss(model, test))
   } else {
-    return(aicc(model, env, parallel))
+    return(aicc(model, env))
   }
 }
 
@@ -92,7 +91,7 @@
 
 .create_sdmtune_result <- function(model, metric, train_metric, val_metric) {
 
-  tunable_hypers <- get_tunable_args(model)
+  tunable_hypers <- getTunableArgs(model)
   l <- length(tunable_hypers)
   labels <- c(tunable_hypers, .get_sdmtune_colnames(metric))
 
@@ -122,7 +121,7 @@
 
 .create_sdmtune_output <- function(models, metric, train_metric, val_metric) {
 
-  tunable_hypers <- get_tunable_args(models[[1]])
+  tunable_hypers <- getTunableArgs(models[[1]])
   l <- length(tunable_hypers)
   labels <- c(tunable_hypers, .get_sdmtune_colnames(metric))
 
@@ -131,7 +130,7 @@
   fcs <- vector("character", length = length(models))
   distrs <- vector("character", length = length(models))
 
-  for (i in 1:length(models)) {
+  for (i in seq_along(models)) {
     if (class(models[[i]]) == "SDMmodel") {
       m <- models[[i]]
     } else {
@@ -216,8 +215,7 @@
 #' Returns the name of all function arguments that can be tuned for a given
 #' model.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #'
 #' @return character vector
 #' @export
@@ -238,16 +236,15 @@
 #' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
 #'                    env = predictors, categorical = "biome")
 #'
-#' # Train a Maxent model and get tunable hyperparameters
+#' # Train a Maxnet model and get tunable hyperparameters
 #' model <- train(method = "Maxnet", data = data, fc = "l")
 #' get_tunable_args(model)
-#'
-#' \donttest{
-#' # Train a Maxnet model and get tunable hyperparameters
-#' model <- train(method = "Maxent", data = data, fc = "l")
-#' get_tunable_args(model)
-#' }
 get_tunable_args <- function(model) {
+
+  # TODO: remove this function in next release
+
+  warning("This function will be deprecated in the next release, please use ",
+          "\"getTunableArgs()\" instead.")
 
   if (class(model) == "SDMmodelCV") {
     method <- class(model@models[[1]]@model)
@@ -284,7 +281,8 @@ get_tunable_args <- function(model) {
 .check_args <- function(model, metric, test = NULL, env = NULL, hypers = NULL) {
   # Throws exception if metric is aicc and env is not provided
   if (metric == "aicc" & is.null(env) & class(model) == "SDMmodel")
-    stop("You must provide the 'env' argument if you want to use the AICc metric!")
+    stop("You must provide the 'env' argument if you want to use the AICc ",
+         "metric!")
   # Throws exception if model is SDMmodel, metric is not aicc and
   # test is not provided
   if (class(model) == "SDMmodel" & is.null(test) & metric != "aicc") {
@@ -296,7 +294,7 @@ get_tunable_args <- function(model) {
   # Check hypers
   if (!is.null(hypers)) {
     # Throws exception if provided hypers are not tunable
-    diff <- setdiff(names(hypers), get_tunable_args(model))
+    diff <- setdiff(names(hypers), getTunableArgs(model))
     if (length(diff) > 0)
       stop(paste(diff, "non included in tunable hyperparameters",
                  collapse = ", "))
@@ -305,7 +303,7 @@ get_tunable_args <- function(model) {
 
 .get_hypers_grid <- function(model, hypers) {
   # Create data frame with all possible combinations of hyperparameters
-  tunable_args <- .get_train_args(model)[get_tunable_args(model)]
+  tunable_args <- .get_train_args(model)[getTunableArgs(model)]
   tunable_args[names(hypers)] <- hypers
   grid <- expand.grid(tunable_args, stringsAsFactors = FALSE)
   return(grid)
@@ -321,12 +319,4 @@ get_tunable_args <- function(model) {
     "trainRF" = c("data", "mtry", "ntree", "nodesize")
   )
   return(output)
-}
-
-#' @importFrom raster endCluster
-.end_parallel <- function() {
-  options(SDMtuneParallel = FALSE)
-  raster_option <- getOption("rasterCluster")
-  if (!is.null(raster_option) && raster_option)
-    raster::endCluster()
 }

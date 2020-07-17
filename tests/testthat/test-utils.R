@@ -1,5 +1,4 @@
 skip_on_cran()
-skip_on_appveyor()
 
 data <- SDMtune:::t
 model <- SDMtune:::bm_maxnet
@@ -156,13 +155,16 @@ test_that(".get_train_args", {
 })
 
 test_that("get_tunable_args", {
-  expect_equal(get_tunable_args(model_mx), c("fc", "reg", "iter"))
-  expect_equal(get_tunable_args(model), c("fc", "reg"))
-  expect_equal(get_tunable_args(model_ann), c("size", "decay", "rang", "maxit"))
-  expect_equal(get_tunable_args(model_rf), c("mtry", "ntree", "nodesize"))
-  expect_equal(get_tunable_args(model_brt),
-               c("distribution", "n.trees", "interaction.depth", "shrinkage",
-                 "bag.fraction"))
+  expect_warning(expect_equal(get_tunable_args(model_mx),
+                              c("fc", "reg", "iter")))
+  expect_warning(expect_equal(get_tunable_args(model), c("fc", "reg")))
+  expect_warning(expect_equal(get_tunable_args(model_ann),
+                              c("size", "decay", "rang", "maxit")))
+  expect_warning(expect_equal(get_tunable_args(model_rf),
+                              c("mtry", "ntree", "nodesize")))
+  expect_warning(expect_equal(get_tunable_args(model_brt),
+                 c("distribution", "n.trees", "interaction.depth", "shrinkage",
+                   "bag.fraction")))
 })
 
 test_that(".create_model_from_settings", {
@@ -235,11 +237,4 @@ test_that("The function .args_name", {
   expect_vector(.args_name("trainMaxent"), ptype = character(), size = 4)
   expect_vector(.args_name("trainMaxnet"), ptype = character(), size = 3)
   expect_vector(.args_name("trainRF"), ptype = character(), size = 4)
-})
-
-test_that("The function .end_parallel works properly", {
-  options(rasterCluster = TRUE)
-  .end_parallel()
-  expect_false(getOption("SDMtuneParallel"))
-  expect_false(getOption("rasterCluster"))
 })

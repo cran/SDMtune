@@ -4,33 +4,26 @@
 #' a population of random models each one with a random combination of the
 #' provided hyperparameters values.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #' @param hypers named list containing the values of the hyperparameters that
 #' should be tuned, see details.
 #' @param metric character. The metric used to evaluate the models, possible
 #' values are: "auc", "tss" and "aicc".
-#' @param test \code{\linkS4class{SWD}} object. Test dataset used to evaluate
-#' the model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
-#' default is \code{NULL}.
+#' @param test \linkS4class{SWD} object. Test dataset used to evaluate the
+#' model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
+#' default is `NULL`.
 #' @param pop numeric. Size of the population, default is 20.
-#' @param env \code{\link[raster]{stack}} containing the environmental
-#' variables, used only with "aicc", default is \code{NULL}.
-#' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.
+#' @param env \link[raster]{stack} containing the environmental variables, used
+#' only with "aicc", default is `NULL`.
+#' @param parallel deprecated.
 #' @param seed numeric. The value used to set the seed to have consistent
-#' results, default is \code{NULL}.
+#' results, default is `NULL`.
 #'
 #' @details * To know which hyperparameters can be tuned you can use the output
-#' of the function \code{\link{get_tunable_args}}. Hyperparameters not included
-#' in the \code{hypers} argument take the value that they have in the passed
-#' model.
-#' * Parallel computation is used only during the execution of the predict
-#' function, and increases the speed only for large datasets. For small dataset
-#' it may result in a longer execution, due to the time necessary to create the
-#' cluster.
+#' of the function \link{getTunableArgs}. Hyperparameters not included in the
+#' `hypers` argument take the value that they have in the passed model.
 #'
-#' @return \code{\linkS4class{SDMtune}} object.
+#' @return \linkS4class{SDMtune} object.
 #' @export
 #'
 #' @author Sergio Vignali
@@ -66,17 +59,22 @@
 #'                        pop = 10, seed = 25)
 #' output@results
 #' output@models
-#' # Order rusults by highest test AUC
+#' # Order results by highest test AUC
 #' output@results[order(-output@results$test_AUC), ]
 #' }
 randomSearch <- function(model, hypers, metric, test = NULL, pop = 20,
                          env = NULL, parallel = FALSE, seed = NULL) {
 
+  # TODO remove this code in a next release
+  if (parallel)
+    warning("parallel argument is deprecated and not used anymore",
+            call. = FALSE, immediate. = TRUE)
+
   metric <- match.arg(metric, choices = c("auc", "tss", "aicc"))
 
   output <- optimizeModel(model = model, hypers = hypers, test = test,
                           metric = metric, pop = pop, gen = 0, env = env,
-                          parallel = parallel, seed = seed)
+                          seed = seed)
 
   return(output)
 }

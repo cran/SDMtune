@@ -7,8 +7,7 @@
 get_tunable_args(model)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 }
 \value{
 character vector
@@ -31,15 +30,9 @@ bg_coords <- virtualSp$background
 data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
                    env = predictors, categorical = "biome")
 
-# Train a Maxent model and get tunable hyperparameters
+# Train a Maxnet model and get tunable hyperparameters
 model <- train(method = "Maxnet", data = data, fc = "l")
 get_tunable_args(model)
-
-\donttest{
-# Train a Maxnet model and get tunable hyperparameters
-model <- train(method = "Maxent", data = data, fc = "l")
-get_tunable_args(model)
-}
 }
 \author{
 Sergio Vignali

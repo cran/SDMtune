@@ -7,12 +7,11 @@
 #' specificity and maximum test sensitivity plus specificity thresholds and the
 #' p-values of the one-tailed binomial exact test.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} object.
+#' @param model \linkS4class{SDMmodel} object.
 #' @param type character. The output type used for "Maxent" and "Maxnet"
-#' methods, possible values are "cloglog" and "logistic", default is
-#' \code{NULL}.
-#' @param test \code{\linkS4class{SWD}} test locations, if not provided it
-#' returns the training and test thresholds, default is \code{NULL}.
+#' methods, possible values are "cloglog" and "logistic", default is `NULL`.
+#' @param test \linkS4class{SWD} testing locations, if not provided it returns
+#' the training and test thresholds, default is `NULL`.
 #'
 #' @details The equal training sensitivity and specificity minimizes the
 #' difference between sensitivity and specificity. The one-tailed binomial test
@@ -21,7 +20,6 @@
 #'
 #' @return data.frame with the thresholds.
 #' @export
-#' @importFrom stats binom.test
 #'
 #' @author Sergio Vignali
 #'
@@ -94,14 +92,14 @@ thresholds <- function(model, type = NULL, test = NULL) {
   or_train <- vector(mode = "numeric", length = length(ths))
   fpa <- vector(mode = "numeric", length = length(ths))
 
-  for (i in 1:length(ths)) {
+  for (i in seq_along(ths)) {
     index <- which.min(abs(cm_train$th - ths[i]))
     or_train[i] <- cm_train[index, ]$fn / n_pres
     fpa[i] <- fpr[index]
     if (!is.null(test)) {
       index <- which.min(abs(cm_test$th - ths[i]))
       or_test[i] <- cm_test[index, ]$fn / n_test
-      p_values[i] <- stats::binom.test( (round( (1 - or_test[i]), 0) * n_test),
+      p_values[i] <- stats::binom.test((round((1 - or_test[i]), 0) * n_test),
                                        n_test, fpa[i],
                                        alternative = "greater")$p.value
     }

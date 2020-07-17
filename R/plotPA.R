@@ -2,30 +2,28 @@
 #'
 #' Plot a presence absence map using the given threshold.
 #'
-#' @param map \code{\link[raster]{raster}} object with the prediction.
+#' @param map \link[raster]{raster} object with the prediction.
 #' @param th numeric. The threshold used to convert the output in a
 #' presence/absence map.
-#' @param colors vector. Colors to be used, default is \code{NULL} and uses red
-#' and blue.
-#' @param hr logical, if \code{TRUE} produces an output with high resolution,
-#' default is {FALSE}.
+#' @param colors vector. Colors to be used, default is `NULL` and uses red and
+#' blue.
+#' @param hr logical, if `TRUE` produces an output with high resolution,
+#' default is `FALSE`.
 #' @param filename character, if provided the raster map is saved in a file,
-#' default is \code{NULL}.
-#' @param format character. The output format, see
-#' \code{\link[raster]{writeRaster}} for all the options, default is Geotiff.
-#' @param ... Additional arguments, see \code{\link{writeRaster}} for all the
+#' default is `NULL`.
+#' @param format character. The output format, see \link[raster]{writeRaster}
+#' for all the options, default is Geotiff.
+#' @param ... Additional arguments, see \link[raster]{writeRaster} for all the
 #' options.
 #'
-#' @return A \code{\link[ggplot2]{ggplot}} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #' @export
-#' @importFrom ggplot2 geom_tile aes_ scale_fill_manual coord_equal labs
-#' scale_x_continuous scale_y_continuous theme_minimal theme element_text
-#' element_blank
-#' @importFrom raster writeRaster
+#' @importFrom rlang .data
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @author Sergio Vignali
 #'
-#' @seealso \code{\link{plotPred}}
+#' @seealso \link{plotPred}.
 #'
 #' @examples
 #' \donttest{
@@ -34,7 +32,10 @@
 #' # Custom colors
 #' plotPA(map, th = 0.5, colors = c("#d8b365", "#018571"))
 #' # Save the file
+#' \dontrun{
+#' # The following command will save the map in the working directory
 #' plotPA(map, th = 0.7, filename = "my_map", format = "ascii")
+#' }
 #' }
 plotPA <- function(map, th, colors = NULL, hr = FALSE, filename = NULL,
                    format = "GTiff", ...) {
@@ -66,20 +67,18 @@ plotPA <- function(map, th, colors = NULL, hr = FALSE, filename = NULL,
   my_plot$data$value <- as.logical(my_plot$data$value)
 
   my_plot <- my_plot +
-    geom_tile(aes_(fill = ~value)) +
-    scale_fill_manual(values = colors,
-                      breaks = c(1, 0),
-                      labels = c("Presence", "Absence"),
-                      name = "") +
-    coord_equal() +
-    labs(title = "", x = "", y = "") +
-    scale_x_continuous(expand = c(0, 0)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5),
-          axis.ticks.x = element_blank(),
-          axis.ticks.y = element_blank(),
-          text = element_text(colour = "#666666"))
+    ggplot2::geom_tile(aes(fill = .data$value)) +
+    ggplot2::scale_fill_manual(values = colors, breaks = c(TRUE, FALSE),
+                               labels = c("Presence", "Absence"), name = "") +
+    ggplot2::coord_equal() +
+    ggplot2::labs(title = "", x = "", y = "") +
+    ggplot2::scale_x_continuous(expand = c(0, 0)) +
+    ggplot2::scale_y_continuous(expand = c(0, 0)) +
+    ggplot2::theme_minimal() +
+    ggplot2:: theme(plot.title = ggplot2::element_text(hjust = 0.5),
+                    axis.ticks.x = ggplot2::element_blank(),
+                    axis.ticks.y = ggplot2::element_blank(),
+                    text = ggplot2::element_text(colour = "#666666"))
 
   return(my_plot)
 }

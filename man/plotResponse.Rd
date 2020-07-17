@@ -4,22 +4,27 @@
 \alias{plotResponse}
 \title{Plot Response Curve}
 \usage{
-plotResponse(model, var, type = NULL, only_presence = FALSE,
-  marginal = FALSE, fun = mean, rug = FALSE, color = "red")
+plotResponse(
+  model,
+  var,
+  type = NULL,
+  only_presence = FALSE,
+  marginal = FALSE,
+  fun = mean,
+  rug = FALSE,
+  color = "red"
+)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
 \item{var}{character. Name of the variable to be plotted.}
 
 \item{type}{character. The output type used for "Maxent" and "Maxnet"
-methods, possible values are "cloglog" and "logistic", default is
-\code{NULL}.}
+methods, possible values are "cloglog" and "logistic", default is \code{NULL}.}
 
-\item{only_presence}{logical, if \code{TRUE} it uses only the presence
-locations when applying the function for the marginal response, default is
-\code{FALSE}.}
+\item{only_presence}{logical, if \code{TRUE} it uses only the presence locations
+when applying the function for the marginal response, default is \code{FALSE}.}
 
 \item{marginal}{logical, if \code{TRUE} it plots the marginal response curve,
 default is \code{FALSE}.}
@@ -34,14 +39,14 @@ default is \code{FALSE}.}
 \item{color}{The color of the curve, default is "red".}
 }
 \value{
-A \code{\link[ggplot2]{ggplot}} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Plot the Response Curve of the given environmental variable.
 }
 \details{
-Note that fun is not a character argument, you must use \code{mean}
-and not \code{"mean"}.
+Note that fun is not a character argument, you must use \code{mean} and
+not \code{"mean"}.
 }
 \examples{
 \donttest{
@@ -59,7 +64,7 @@ data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
                    env = predictors, categorical = "biome")
 
 # Train a model
-model <- train(method = "Maxnet", data = data, fc = "l")
+model <- train(method = "Maxnet", data = data, fc = "lq")
 
 # Plot cloglog response curve for a continuous environmental variable (bio1)
 plotResponse(model, var = "bio1", type = "cloglog")
@@ -78,7 +83,8 @@ plotResponse(model, var = "bio12", type = "logistic", rug = TRUE,
 plotResponse(model, var = "biome", type = "logistic", color = "green")
 
 # Train a model with cross validation
-model <- train(method = "Maxnet", p = presence, a = bg, fc = "lq", rep = 4)
+folds <- randomFolds(data, k = 4, only_presence = TRUE)
+model <- train(method = "Maxnet", data = data, fc = "lq", folds = folds)
 
 # Plot cloglog response curve for a continuous environmental variable (bio17)
 plotResponse(model, var = "bio1", type = "cloglog")

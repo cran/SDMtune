@@ -17,7 +17,6 @@
   .render_script(folder, script, settings, data)
 }
 
-#' @importFrom rstudioapi viewer
 .show_chart <- function(folder, height = 300) {
 
   # Show chart if not called from testthat
@@ -33,8 +32,6 @@
   }
 }
 
-#' @importFrom jsonlite toJSON
-#' @importFrom whisker whisker.render
 .render_script <- function(folder, script, settings, data) {
 
   template <- paste(readLines(file.path(system.file("scripts",
@@ -50,14 +47,11 @@
   writeLines(rendered_script, file.path(folder, "lib", "chart_script.js"))
 }
 
-#' @importFrom jsonlite write_json
 .update_data <- function(folder, data) {
   jsonlite::write_json(data, file.path(folder, "data.json"))
   Sys.sleep(.1)
 }
 
-#' @importFrom tools startDynamicHelp
-#' @importFrom utils browseURL
 .start_server <- function(folder) {
 
   port <- suppressMessages(tools::startDynamicHelp(start = NA))
@@ -84,7 +78,7 @@
   }
 
   # Check how many hypers have be tuned
-  tunable_hypers <- get_tunable_args(x@models[[1]])
+  tunable_hypers <- getTunableArgs(x@models[[1]])
   hyper_cols <- length(tunable_hypers)
   tuned_hypers <- rapply(res[, tunable_hypers], function(x) length(unique(x)))
   #Show line if only one hyper has be tuned
@@ -131,19 +125,19 @@
     }
 
     #  Create scatterplot
-    p <- ggplot(data, aes_string(x = "x", y = "y", colour = "type",
-                                 group = "type")) +
-      geom_point() +
-      labs(x = "model", y = metric, title = title) +
-      scale_color_manual(name = "", values = c("#4bc0c0", "#f58410")) +
-      theme_minimal() +
-      theme(plot.title = element_text(hjust = 0.5),
-            text = element_text(colour = "#666666"),
-            legend.position = "bottom")
+    p <- ggplot(data, aes(x = .data$x, y = .data$y, colour = .data$type,
+                          group = .data$type)) +
+      ggplot2::geom_point() +
+      ggplot2::labs(x = "model", y = metric, title = title) +
+      ggplot2::scale_color_manual(name = "", values = c("#4bc0c0", "#f58410")) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
+                     text = ggplot2::element_text(colour = "#666666"),
+                     legend.position = "bottom")
 
-    # Add line if is the rusult of a tune function
+    # Add line if is the result of a tune function
     if (show_line)
-      p <- p + geom_line(linetype = "dashed", size = .3)
+      p <- p + ggplot2::geom_line(linetype = "dashed", size = .3)
 
     return(p)
   }

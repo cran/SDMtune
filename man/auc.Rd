@@ -7,13 +7,12 @@
 auc(model, test = NULL)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or
-\code{\linkS4class{SDMmodelCV}} objects.}
+\item{model}{An \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
-\item{test}{\code{\linkS4class{SWD}} object for \code{\linkS4class{SDMmodel}}
-object. Logical or \code{\linkS4class{SWD}} object for
-\code{\linkS4class{SDMmodelCV}} objects, if not provided it computes the
-train AUC, see details. Default is \code{NULL}.}
+\item{test}{\linkS4class{SWD} object when \code{model} is an
+\linkS4class{SDMmodel} object; logical or \linkS4class{SWD} object when
+\code{model} is an \linkS4class{SDMmodelCV} object. If not provided it computes
+the training AUC, see details. Default is \code{NULL}.}
 }
 \value{
 The value of the AUC.
@@ -22,11 +21,11 @@ The value of the AUC.
 Compute the AUC using the Man-Whitney U Test formula.
 }
 \details{
-For \code{\linkS4class{SDMmodelCV}} objects, the function computes
-the mean of the training AUC values of the k-folds. If \code{test = TRUE} it
-computes the mean of the testing AUC values for the k-folds. If test is an
-\code{\linkS4class{SWD}} object, it computes the mean AUC values for the
-provided testing dataset.
+For \linkS4class{SDMmodelCV} objects, the function computes the mean
+of the training AUC values of the k-folds. If \code{test = TRUE} it computes the
+mean of the testing AUC values for the k-folds. If test is an
+\linkS4class{SWD} object, it computes the mean AUC values for the provided
+testing dataset.
 }
 \examples{
 # Acquire environmental variables
@@ -78,6 +77,9 @@ Mason, S. J. and Graham, N. E. (2002), Areas beneath the relative
 operating characteristics (ROC) and relative operating levels (ROL) curves:
 Statistical significance and interpretation. Q.J.R. Meteorol. Soc., 128:
 2145-2166.
+}
+\seealso{
+\link{aicc} and \link{tss}.
 }
 \author{
 Sergio Vignali

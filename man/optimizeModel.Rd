@@ -4,13 +4,23 @@
 \alias{optimizeModel}
 \title{Optimize Model}
 \usage{
-optimizeModel(model, hypers, metric, test = NULL, pop = 20, gen = 5,
-  env = NULL, parallel = FALSE, keep_best = 0.4, keep_random = 0.2,
-  mutation_chance = 0.4, seed = NULL)
+optimizeModel(
+  model,
+  hypers,
+  metric,
+  test = NULL,
+  pop = 20,
+  gen = 5,
+  env = NULL,
+  parallel = FALSE,
+  keep_best = 0.4,
+  keep_random = 0.2,
+  mutation_chance = 0.4,
+  seed = NULL
+)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
 \item{hypers}{named list containing the values of the hyperparameters that
 should be tuned, see details.}
@@ -18,19 +28,18 @@ should be tuned, see details.}
 \item{metric}{character. The metric used to evaluate the models, possible
 values are: "auc", "tss" and "aicc".}
 
-\item{test}{\code{\linkS4class{SWD}} object. Test dataset used to evaluate
-the model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
-default is \code{NULL}.}
+\item{test}{\linkS4class{SWD} object. Testing dataset used to evaluate
+the model, not used with aicc and \linkS4class{SDMmodelCV} objects, default
+is \code{NULL}.}
 
 \item{pop}{numeric. Size of the population, default is 5.}
 
 \item{gen}{numeric. Number of generations, default is 20.}
 
-\item{env}{\code{\link[raster]{stack}} containing the environmental
-variables, used only with "aicc", default is \code{NULL}.}
+\item{env}{\link[raster]{stack} containing the environmental variables, used
+only with "aicc", default is \code{NULL}.}
 
-\item{parallel}{logical, if \code{TRUE} it uses parallel computation, default
-is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.}
+\item{parallel}{deprecated.}
 
 \item{keep_best}{numeric. Percentage of the best models in the population to
 be retained during each iteration, expressed as decimal number. Default
@@ -46,7 +55,7 @@ expressed as decimal number. Default is 0.4.}
 results, default is \code{NULL}.}
 }
 \value{
-\code{\linkS4class{SDMtune}} object.
+\linkS4class{SDMtune} object.
 }
 \description{
 The function uses a Genetic Algorithm implementation to optimize the model
@@ -54,14 +63,9 @@ hyperparameter configuration according to the chosen metric.
 }
 \details{
 To know which hyperparameters can be tuned you can use the output
-of the function \code{\link{get_tunable_args}}. Hyperparameters not included
-in the \code{hypers} argument take the value that they have in the passed
-model.
+of the function \link{getTunableArgs}. Hyperparameters not included in the
+\code{hypers} argument take the value that they have in the passed model.
 \itemize{
-\item Parallel computation is used only during the execution of the predict
-function, and increases the speed only for large datasets. For small dataset
-it may result in a longer execution, due to the time necessary to create the
-cluster.
 \item Part of the code is inspired by
 \href{https://blog.coast.ai/lets-evolve-a-neural-network-with-a-geneticalgorithm-code-included-8809bece164}{this post}.
 }
@@ -82,26 +86,30 @@ data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
                    env = predictors, categorical = "biome")
 
 # Split presence locations in training (80\%) and testing (20\%) datasets
-datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+datasets <- trainValTest(data, val = 0.2, test = 0.2, only_presence = TRUE,
+                         seed = 61516)
 train <- datasets[[1]]
-test <- datasets[[2]]
+val <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxent", data = train, fc = "l")
+model <- train("Maxnet", data = train)
 
 # Define the hyperparameters to test
-h <- list(reg = 1:3, fc = c("lqp", "lqph", "lh"), iter = seq(300, 700, 100))
+h <- list(reg = seq(0.2, 5, 0.2),
+          fc = c("l", "lq", "lh", "lp", "lqp", "lqph"))
 
 # Run the function using as metric the AUC
-output <- optimizeModel(model, hypers = h, metric = "auc", test = test,
-                        seed = 25)
+\dontrun{
+output <- optimizeModel(model, hypers = h, metric = "auc", test = val,
+                        pop = 15, gen = 2, seed = 798)
 output@results
 output@models
 output@models[[1]]  # Best model
 }
 }
+}
 \seealso{
-\code{\link{gridSearch}} and \code{\link{randomSearch}}.
+\link{gridSearch} and \link{randomSearch}.
 }
 \author{
 Sergio Vignali

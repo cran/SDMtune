@@ -1,5 +1,4 @@
 skip_on_cran()
-skip_on_appveyor()
 
 m <- SDMtune:::bm_maxent_cv
 train <- SDMtune:::t
@@ -28,13 +27,6 @@ test_that("The method works with raster stack objects", {
   p <- predict(m, predictors, type = "raw")
   expect_length(p, predictors$bio1@ncols * predictors$bio1@nrows)
   expect_s4_class(p, "RasterLayer")
-})
-
-test_that("The method works with raster stack objects and parallel", {
-  p <- predict(m, predictors, type = "raw", parallel = TRUE)
-  expect_length(p, predictors$bio1@ncols * predictors$bio1@nrows)
-  expect_s4_class(p, "RasterLayer")
-  expect_false(getOption("SDMtuneParallel"))
 })
 
 test_that("The output is the function applied to the k predictions", {

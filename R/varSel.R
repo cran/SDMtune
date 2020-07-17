@@ -10,41 +10,32 @@
 #' The process is repeated until the remaining variables are not highly
 #' correlated anymore.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #' @param metric character. The metric used to evaluate the models, possible
 #' values are: "auc", "tss" and "aicc".
-#' @param bg4cor \code{\linkS4class{SWD}} object. Background locations used to
-#' test the correlation between environmental variables.
-#' @param test \code{\linkS4class{SWD}}. Test dataset used to evaluate the
-#' model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
-#' default is \code{NULL}.
-#' @param env \code{\link[raster]{stack}} containing the environmental
-#' variables, used only with "aicc", default is \code{NULL}.
-#' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.
+#' @param bg4cor \linkS4class{SWD} object. Background locations used to test the
+#' correlation between environmental variables.
+#' @param test \linkS4class{SWD}. Test dataset used to evaluate the model, not
+#' used with aicc and \linkS4class{SDMmodelCV} objects, default is `NULL`.
+#' @param env \link[raster]{stack} containing the environmental variables, used
+#' only with "aicc", default is `NULL`.
+#' @param parallel deprecated.
 #' @param method character. The method used to compute the correlation matrix,
 #' default "spearman".
 #' @param cor_th numeric. The correlation threshold used to select highly
 #' correlated variables, default is 0.7.
 #' @param permut integer. Number of permutations, default is 10.
-#' @param use_pc logical, use percent contribution. If \code{TRUE} and the model
-#' is trained using the \code{\link{Maxent}} method, the algorithm uses the
-#' percent contribution computed by Maxent software to score the variable
-#' importance, default is \code{FALSE}.
+#' @param use_pc logical, use percent contribution. If `TRUE` and the model is
+#' trained using the \linkS4class{Maxent} method, the algorithm uses the percent
+#' contribution computed by Maxent software to score the variable importance,
+#' default is `FALSE`.
 #'
-#' @details * Parallel computation is used only during the execution of the
-#' predict function,  and increases the speed only for large datasets. For small
-#' dataset it may result in a longer execution, due to the time necessary to
-#' create the cluster.
-#' * To find highly correlated variables the following formula is used:
+#' @details * To find highly correlated variables the following formula is used:
 #' \deqn{| coeff | \le cor_th}
 #'
-#' @return The \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object trained using the selected variables.
+#' @return The \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object trained
+#' using the selected variables.
 #' @export
-#' @importFrom progress progress_bar
-#' @importFrom stats cor
 #'
 #' @author Sergio Vignali
 #'
@@ -71,11 +62,13 @@
 #' # Train a model
 #' model <- train(method = "Maxnet", data = train, fc = "l")
 #'
-#' # Prepare background locations to test autocorrelation
+#' # Prepare background locations to test autocorrelation, this usually gives a
+#' # warning message given that less than 10000 points can be randomly sampled
 #' bg_coords <- dismo::randomPoints(predictors, 10000)
 #' bg <- prepareSWD(species = "Virtual species", a = bg_coords,
 #'                  env = predictors, categorical = "biome")
 #'
+#' \dontrun{
 #' # Remove variables with correlation higher than 0.7 accounting for the AUC,
 #' # in the following example the variable importance is computed as permutation
 #' # importance
@@ -87,6 +80,9 @@
 #' # in the following example the variable importance is the MaxEnt percent
 #' # contribution
 #' # Train a model
+#' # The next line checks if Maxent is correctly configured but you don't need
+#' # to run it in your script
+#' if (checkMaxentInstallation(verbose = FALSE)) {
 #' model <- train(method = "Maxent", data = train, fc = "l")
 #' vs <- varSel(model, metric = "tss", bg4cor = bg, test = test, cor_th = 0.7,
 #'              use_pc = TRUE)
@@ -99,9 +95,16 @@
 #'              use_pc = TRUE, env = predictors)
 #' vs
 #' }
+#' }
+#' }
 varSel <- function(model, metric, bg4cor, test = NULL, env = NULL,
                    parallel = FALSE, method = "spearman", cor_th = 0.7,
                    permut = 10, use_pc = FALSE) {
+
+  # TODO remove this code in a next release
+  if (parallel)
+    warning("parallel argument is deprecated and not used anymore",
+            call. = FALSE, immediate. = TRUE)
 
   metric <- match.arg(metric, choices = c("auc", "tss", "aicc"))
 
@@ -132,11 +135,10 @@ varSel <- function(model, metric, bg4cor, test = NULL, env = NULL,
   df <- bg4cor@data
   categorical <- names(Filter(is.factor, df))
   df[categorical] <- list(NULL)
-  cor_matrix <- cor(df, method = method)
+  cor_matrix <- stats::cor(df, method = method)
 
   # metric used for chart
-  train_metric <- data.frame(x = 0, y = .get_metric(metric, model, env = env,
-                                                    parallel = parallel))
+  train_metric <- data.frame(x = 0, y = .get_metric(metric, model, env = env))
   if (metric != "aicc") {
     val_metric <- data.frame(x = 0, y = .get_metric(metric, model, test = test))
   } else {
@@ -180,7 +182,7 @@ varSel <- function(model, metric, bg4cor, test = NULL, env = NULL,
       .update_data(folder, data = data)
     }
 
-    for (i in 1:length(vars)) {
+    for (i in seq_along(vars)) {
 
       if (vars[i] %in% categorical)
         next
@@ -191,8 +193,7 @@ varSel <- function(model, metric, bg4cor, test = NULL, env = NULL,
       if (length(hcv) > 1) {
         jk_test <- suppressMessages(doJk(model, metric = metric, test = test,
                                          variables = hcv, with_only = FALSE,
-                                         env = env, parallel = parallel,
-                                         return_models = TRUE))
+                                         env = env, return_models = TRUE))
 
         # index for metric data frames
         x <- nrow(train_metric)

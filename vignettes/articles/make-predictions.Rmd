@@ -32,8 +32,8 @@ library(SDMtune)
 
 New locations are predicted with the function [predict()](../../reference/predict-SDMmodel-method.html). The function takes three main arguments:
 
-* a trained `SDMmodel()` object;
-* a new dataset, used to make prediction; can be a `data.frame`, an `SWD()` object or a raster `stack` object;
+* a trained model given as `SDMmodel()` object;
+* a new dataset, used to make prediction (can be a `data.frame`, an `SWD()` object or a raster `stack` object);
 * the output type, that for **Maxent** models can be: **raw**, **logistic** or **cloglog**.
 
 Next we get the prediction for our training locations using the **cloglog** output type:
@@ -55,10 +55,11 @@ pred <- predict(default_model, data = p, type = "cloglog")
 tail(pred)
 ```
 
+For models trained with the **Maxent**  method, the function performs the prediction in R without calling the MaxEnt Java software. This results in a faster computation for large datasets and might result in a slightly different output compared to the Java software.
 
 ## Create a distribution map
 
-We can use the same function to create a distribution map starting from the `predictors` raster `stack' object we created in the [first article](./prepare-data.html#acquire-environmental-variables).
+We can use the same function to create a distribution map starting from the `predictors` raster `stack' object that we created in the [first article](./prepare-data.html#acquire-environmental-variables).
 
 ```{r predict raster}
 map <- predict(default_model, data = predictors, type = "cloglog")
@@ -79,10 +80,7 @@ map <- predict(default_model, data = predictors, type = "cloglog", file = "my_ma
 The [predict()](../../reference/predict-SDMmodel-method.html) function has other arguments useful when predicting large datasets:
 
 * **progress**: can be set to `"text"` to visualize a progress bar;
-* **parallel**: can be set to `TRUE` for parallel computation;
 * **extent**: can be passed to reduce the prediction to the given extent.
-
-Note that the parallel computation works well only for large datasets due to the time necessary to create the cluster.
 
 ## Plot a distribution map
 
@@ -92,7 +90,7 @@ To plot the distribution map we can use the function `plotPred()`:
 plotPred(map)
 ```
 
-The `plotPred()` function plots a map with a color ramp similar to the one used by the MaxEnt Java software. We can pass additional arguments to customize the map. In the next example we provide a custom color ramp and we add a title to the legend:
+The function `plotPred()` plots a map with a color ramp similar to the one used by the MaxEnt Java software. We can pass additional arguments to customize the map. In the next example we provide a custom color ramp and we add a title to the legend:
 
 ```{r plot map custom, fig.align="center"}
 plotPred(map, lt = "Habitat\nsuitability", colorramp = c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"))
@@ -117,23 +115,25 @@ plotPred(map_e)
 To plot a presence/absence map we need a threshold value that splits the prediction in presence and absence values. The function `thresholds()` returns some commonly used threshold values starting from an `SDMmodel()` object. In the next example we print the threshold values for the `default_model` object using the type `"cloglog"`:
 
 ```{r thresholds, eval=FALSE}
+ths <- thresholds(default_model, type = "cloglog")
 thresholds(default_model, type = "cloglog")
 ```
 ```{r thresholds code, echo=FALSE}
-kable(thresholds(default_model, type = "cloglog")) %>%
+ths <- thresholds(default_model, type = "cloglog")
+kable(ths) %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
 For example we want to create a presence/absence map using the threshold that maximize the training sensitivity plus specificity. We use the function `plotPA()` passing the threshold value as argument:
 
 ```{r plot pa, fig.align="center"}
-plotPA(map, th = 0.497)
+plotPA(map, th = ths[3, 2])
 ```
 
 We can also save the map in a file with the following code:
 
 ```{r plot and save pa, eval=FALSE}
-plotPA(map, th = 0.497, filename = "my_pa_map", format = "GTiff")
+plotPA(map, th = ths[3, 2], filename = "my_pa_map", format = "GTiff")
 ```
 
 Both functions `plotPred()` and `plotPA()` have the argument `hr`to plot the the map with high resolution, useful when the map is used in a scientific publication. For all the arguments of the functions that we have used in this article please refer to the [documentation](../..//reference/index.html).

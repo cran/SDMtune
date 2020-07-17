@@ -8,20 +8,18 @@
 #' than one permutation (default is 10) the average of the decrease in training
 #' AUC is computed.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #' @param permut integer. Number of permutations, default is 10.
 #'
 #' @details Note that it could return values slightly different from MaxEnt Java
 #' software due to a different random permutation.
 #'
-#' For \code{\link{SDMmodelCV}} objects the function returns the average and the
+#' For \linkS4class{SDMmodelCV} objects the function returns the average and the
 #' standard deviation of the permutation importances of the single models.
 #'
 #' @return data.frame with the ordered permutation importance.
 #' @export
 #' @importFrom stats sd
-#' @importFrom progress progress_bar
 #'
 #' @author Sergio Vignali
 #'
@@ -56,8 +54,7 @@
 #' # datasets
 #' # Create 4 random folds splitting only the presence locations
 #' folds = randomFolds(data, k = 4, only_presence = TRUE)
-#' model <- train(method = "Maxnet", p = presence, a = bg, fc = "l",
-#'                folds = folds)
+#' model <- train(method = "Maxnet", data = data, fc = "l", folds = folds)
 #' # Compute variable importance
 #' vi <- varImp(model, permut = 5)
 #' vi
@@ -104,11 +101,10 @@ varImp <- function(model, permut = 10) {
 .compute_permutation <- function(model, model_auc, vars, permut, pb) {
 
   permuted_auc <- matrix(nrow = permut, ncol = length(vars))
-  n_pres <- nrow(model@data@data)
   set.seed(25)
 
-  for (j in 1:length(vars)) {
-    for (i in 1:permut) {
+  for (j in seq_along(vars)) {
+    for (i in seq_len(permut)) {
       data <- sample(model@data@data[, vars[j]])
       if (is.factor(model@data@data[, vars[j]]))
         data <- as.factor(data)

@@ -1,5 +1,4 @@
 skip_on_cran()
-skip_on_appveyor()
 
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
                     pattern = "grd", full.names = TRUE)
@@ -17,8 +16,8 @@ test_that("Output is correct", {
   expect_named(swd@data, names(env))
   expect_named(swd@coords, c("X", "Y"))
   expect_true(is.factor(swd@data$biome))
-  expect_equal(rownames(swd@data), as.character(1:length(swd@pa)))
-  expect_equal(rownames(swd@coords), as.character(1:length(swd@pa)))
+  expect_equal(rownames(swd@data), as.character(seq_along(swd@pa)))
+  expect_equal(rownames(swd@coords), as.character(seq_along(swd@pa)))
   expect_equal(nrow(swd@data), length(swd@pa))
   expect_equal(nrow(swd@coords), length(swd@pa))
 })

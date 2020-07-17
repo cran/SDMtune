@@ -2,23 +2,21 @@
 #'
 #' Plot Prediction output.
 #'
-#' @param map \code{\link[raster]{raster}} object with the prediction.
+#' @param map \link[raster]{raster} object with the prediction.
 #' @param lt character. Legend title, default is an empty string.
 #' @param colorramp vector. A custom color ramp given as a vector of colors
-#' (see example), default is \code{NULL} and uses a color ramp similar to the
-#' original MaxEnt output.
-#' @param hr logical, if \code{TRUE} produces an output with high resolution,
-#' default is \code{FALSE}.
+#' (see example), default is `NULL` and uses a blue/red color ramp.
+#' @param hr logical, if `TRUE` produces an output with high resolution,
+#' default is `FALSE`.
 #'
-#' @return A \code{\link[ggplot2]{ggplot}} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #' @export
-#' @importFrom ggplot2 geom_tile scale_fill_gradientn coord_equal labs
-#' scale_x_continuous scale_y_continuous theme_minimal theme element_text
-#' element_blank
+#' @importFrom rlang .data
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @author Sergio Vignali
 #'
-#' @seealso \code{\link{plotPA}}
+#' @seealso \link{plotPA}.
 #'
 #' @examples
 #' \donttest{
@@ -48,20 +46,18 @@ plotPred <- function(map, lt = "", colorramp = NULL, hr = FALSE) {
   }
 
   my_plot <- rasterVis::gplot(map, maxpixels = maxpixels) +
-    geom_tile(aes_(fill = ~value)) +
-    scale_fill_gradientn(colours = colorramp,
-                         limits = c(0, 1),
-                         na.value = "transparent",
-                         name = lt) +
-    coord_equal() +
-    labs(title = "", x = "", y = "") +
-    scale_x_continuous(expand = c(0, 0)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5),
-          axis.ticks.x = element_blank(),
-          axis.ticks.y = element_blank(),
-          text = element_text(colour = "#666666"))
+    ggplot2::geom_tile(aes(fill = .data$value)) +
+    ggplot2::scale_fill_gradientn(colours = colorramp, limits = c(0, 1),
+                                  na.value = "transparent", name = lt) +
+    ggplot2::coord_equal() +
+    ggplot2::labs(title = "", x = "", y = "") +
+    ggplot2::scale_x_continuous(expand = c(0, 0)) +
+    ggplot2::scale_y_continuous(expand = c(0, 0)) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
+                   axis.ticks.x = ggplot2::element_blank(),
+                   axis.ticks.y = ggplot2::element_blank(),
+                   text = ggplot2::element_text(colour = "#666666"))
 
   return(my_plot)
 }

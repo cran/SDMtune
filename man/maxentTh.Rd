@@ -31,12 +31,16 @@ data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
                    env = predictors, categorical = "biome")
 
 # Train a Maxent model
+# The next line checks if Maxent is correctly configured but you don't need
+# to run it in your script
+if (checkMaxentInstallation(verbose = FALSE)) {
 model <- train(method = "Maxent", data = data, fc = "l")
 maxentTh(model)
 }
 }
+}
 \seealso{
-\code{\link{maxentVarImp}}
+\link{maxentVarImp}.
 }
 \author{
 Sergio Vignali

@@ -9,7 +9,7 @@
 #'
 #' @author Sergio Vignali
 #'
-#' @seealso \code{\link{maxentVarImp}}
+#' @seealso \link{maxentVarImp}.
 #'
 #' @examples
 #' \donttest{
@@ -27,8 +27,12 @@
 #'                    env = predictors, categorical = "biome")
 #'
 #' # Train a Maxent model
+#' # The next line checks if Maxent is correctly configured but you don't need
+#' # to run it in your script
+#' if (checkMaxentInstallation(verbose = FALSE)) {
 #' model <- train(method = "Maxent", data = data, fc = "l")
 #' maxentTh(model)
+#' }
 #' }
 maxentTh <- function(model) {
 

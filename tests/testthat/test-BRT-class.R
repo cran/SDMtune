@@ -1,5 +1,4 @@
 skip_on_cran()
-skip_on_appveyor()
 
 test_that("Show method for BRT class produces the correct output", {
   data <- SDMtune:::t
@@ -12,4 +11,3 @@ test_that("Show method for BRT class produces the correct output", {
   expect_output(print(m), "shrinkage        : 0.2", fixed = TRUE)
   expect_output(print(m), "bag.fraction     : 0.6", fixed = TRUE)
 })
-

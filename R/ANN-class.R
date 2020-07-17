@@ -8,11 +8,12 @@ setOldClass("nnet")
 #' @slot decay numeric. Weight decay.
 #' @slot rang numeric. Initial random weights.
 #' @slot maxit integer. Maximum number of iterations.
-#' @slot model \code{\link{nnet}}. The randomForest model object.
+#' @slot model \link{nnet}. The randomForest model object.
 #'
-#' @details See \code{\link{nnet}} for the meaning of the slots.
+#' @details See \link{nnet} for the meaning of the slots.
 #'
-#' @exportClass ANN
+#' @aliases NULL ANN-class
+#' @export
 #'
 #' @author Sergio Vignali
 ANN <- setClass("ANN",

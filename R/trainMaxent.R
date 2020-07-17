@@ -1,7 +1,6 @@
-#' @importFrom dismo maxent
 trainMaxent <- function(data, reg = 1, fc = "lqph", iter = 500) {
 
-  extra_args = c("removeduplicates=false", "addsamplestobackground=false")
+  extra_args <- c("removeduplicates=false", "addsamplestobackground=false")
   result <- SDMmodel(data = data)
   folder <- tempfile()
 
@@ -12,7 +11,8 @@ trainMaxent <- function(data, reg = 1, fc = "lqph", iter = 500) {
   dismo_model <- dismo::maxent(x, p, args = args, path = folder)
 
   l <- .get_lambdas(dismo_model@lambdas)
-  f <- formula(paste("~", paste(l$lambdas$feature, collapse = " + "), "- 1"))
+  f <- stats::formula(paste("~", paste(l$lambdas$feature, collapse = " + "),
+                            "- 1"))
 
   model_object <- Maxent(results = dismo_model@results, reg = reg, fc = fc,
                          iter = iter, extra_args = extra_args,

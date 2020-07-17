@@ -4,20 +4,20 @@ setGeneric("predict", function(object, ...)
 
 #' Predict Maxent
 #'
-#' Predict the output for a new dataset from a trained \linkS4class{Maxent}
-#' model.
+#' Predict the output for a new dataset from a trained Maxent model.
 #'
 #' @param object \linkS4class{Maxent} object.
 #' @param data data.frame with the data for the prediction.
 #' @param type character MaxEnt output type, possible values are "cloglog",
 #' "logistic" and "raw", default is "cloglog".
-#' @param clamp logical for clumping during prediction, default is \code{TRUE}.
+#' @param clamp logical for clumping during prediction, default is `TRUE`.
 #'
-#' @details Used by the \code{\link{predict,SDMmodel-method}}, not exported.
+#' @details Used by the \link{predict,SDMmodel-method}, not exported.
 #'
 #' The function performs the prediction in **R** without calling the
 #' **MaxEnt** Java software. This results in a faster computation for large
-#' datasets. The results might differ slightly from the Java software output.
+#' datasets and might result in a slightly different output compared to the Java
+#' software.
 #'
 #' @include Maxent-class.R
 #'
@@ -29,7 +29,8 @@ setGeneric("predict", function(object, ...)
 #' values from a lambdas file.
 setMethod("predict",
           signature = "Maxent",
-          definition = function(object, data,
+          definition = function(object,
+                                data,
                                 type = c("cloglog", "logistic", "raw"),
                                 clamp = TRUE) {
 
@@ -46,7 +47,7 @@ setMethod("predict",
 
     f <- object@formula
     # Make the design matrix
-    dm <- model.matrix(f, data)
+    dm <- stats::model.matrix(f, data)
     # Scale features and clamp if clamp is TRUE
     cols <- !grepl("categorical.*|hinge.*|threshold.*", colnames(dm))
     dm[, cols] <- scaleClamp(dm[, cols, drop = FALSE], object@coeff$min[cols],

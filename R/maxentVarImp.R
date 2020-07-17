@@ -3,22 +3,21 @@
 #' Shows the percent contribution and permutation importance of the
 #' environmental variables used to train the model.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object trained using the "Maxent" method.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object
+#' trained using the "Maxent" method.
 #'
-#' @details When an \code{\linkS4class{SDMmodelCV}} object is passed to the
-#' function, the output is the average of the variable importance of each model
-#' trained during the cross validation.
+#' @details When an \linkS4class{SDMmodelCV} object is passed to the function,
+#' the output is the average of the variable importance of each model trained
+#' during the cross validation.
 #'
 #' @return A data frame with the variable importance.
 #' @export
 #'
 #' @author Sergio Vignali
 #'
-#' @seealso \code{\link{maxentTh}}
+#' @seealso \link{maxentTh}.
 #'
 #' @examples
-#' \donttest{
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
 #'                     pattern = "grd", full.names = TRUE)
@@ -33,6 +32,9 @@
 #'                    env = predictors, categorical = "biome")
 #'
 #' # Train a Maxent model
+#' # The next line checks if Maxent is correctly configured but you don't need
+#' # to run it in your script
+#' if (checkMaxentInstallation(verbose = FALSE)) {
 #' model <- train(method = "Maxent", data = data, fc = "l")
 #' maxentVarImp(model)
 #' }
@@ -73,5 +75,3 @@ maxentVarImp <- function(model) {
                    stringsAsFactors = FALSE)
   return(df)
 }
-
-

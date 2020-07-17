@@ -8,32 +8,25 @@
 #' stops removing the variable even if the contribution is lower than the given
 #' threshold.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #' @param th numeric. The contribution threshold used to remove variables.
 #' @param metric character. The metric used to evaluate the models, possible
-#' values are: "auc", "tss" and "aicc", used only if use_jk is \code{TRUE}.
-#' @param test \code{\linkS4class{SWD}} object containing the test dataset used
-#' to evaluate the model, not used with aicc, and if \code{use_jk = FALSE},
-#' default is \code{NULL}.
-#' @param env \code{\link[raster]{stack}} containing the environmental
-#' variables, used only with "aicc", default is \code{NULL}.
-#' @param parallel logical, if \code{TRUE} it uses parallel computation, default
-#' is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.
+#' values are: "auc", "tss" and "aicc", used only if use_jk is `TRUE`.
+#' @param test \linkS4class{SWD} object containing the test dataset used to
+#' evaluate the model, not used with aicc, and if `use_jk = FALSE`, default is
+#' `NULL`.
+#' @param env \link[raster]{stack} containing the environmental variables, used
+#' only with "aicc", default is `NULL`.
+#' @param parallel deprecated.
 #' @param use_jk Flag to use the Jackknife AUC test during the variable
-#' selection, if \code{FALSE} the function uses the percent variable
-#' contribution, default is \code{FALSE}.
-#' @param permut integer. Number of permutations, used if use_pc is
-#' \code{FALSE}, default is 10.
-#' @param use_pc logical, use percent contribution. If \code{TRUE} and the model
-#' is trained using the \code{\linkS4class{Maxent}} method, the algorithm uses
-#' the percent contribution computed by Maxent software to score the variable
-#' importance, default is \code{FALSE}.
-#'
-#' @details Parallel computation is used only during the execution of the
-#' predict function, and increases the speed only for large datasets. For small
-#' dataset it may result in a longer execution, due to the time necessary to
-#' create the cluster.
+#' selection, if `FALSE` the function uses the percent variable contribution,
+#' default is `FALSE`.
+#' @param permut integer. Number of permutations, used if `use_pc = FALSE`,
+#' default is 10.
+#' @param use_pc logical, use percent contribution. If `TRUE` and the model
+#' is trained using the \linkS4class{Maxent} method, the algorithm uses the
+#' percent contribution computed by Maxent software to score the variable
+#' importance, default is `FALSE`.
 #'
 #' @return The model trained using the selected variables.
 #' @export
@@ -68,6 +61,7 @@
 #'
 #' # Remove variables with permuation importance lower than 2% only if testing
 #' # TSS doesn't decrease
+#' \dontrun{
 #' output <- reduceVar(model, th = 2, metric = "tss", test = test, permut = 1,
 #'                     use_jk = TRUE)
 #'
@@ -77,15 +71,25 @@
 #'                     use_jk = TRUE, env = predictors)
 #'
 #' # Train a Maxent model
+#' # The next line checks if Maxent is correctly configured but you don't need
+#' # to run it in your script
+#' if (checkMaxentInstallation(verbose = FALSE)) {
 #' model <- train(method = "Maxent", data = train, fc = "lq")
 #'
 #' # Remove all variables with percent contribution lower than 2%
 #' output <- reduceVar(model, th = 2, metric = "auc", test = test,
 #'                     use_pc = TRUE)
 #' }
+#' }
+#' }
 reduceVar <- function(model, th, metric, test = NULL, env = NULL,
                       parallel = FALSE, use_jk = FALSE, permut = 10,
                       use_pc = FALSE) {
+
+  # TODO remove this code in a next release
+  if (parallel)
+    warning("parallel argument is deprecated and not used anymore",
+            call. = FALSE, immediate. = TRUE)
 
   metric <- match.arg(metric, c("auc", "tss", "aicc"))
 
@@ -103,8 +107,7 @@ reduceVar <- function(model, th, metric, test = NULL, env = NULL,
   removed_vars <- c()
 
   # metric used for chart
-  train_metric <- data.frame(x = 0, y = .get_metric(metric, model, env = env,
-                                                    parallel = parallel))
+  train_metric <- data.frame(x = 0, y = .get_metric(metric, model, env = env))
   if (metric != "aicc") {
     val_metric <- data.frame(x = 0, y = .get_metric(metric, model, test = test))
   } else {
@@ -153,12 +156,12 @@ reduceVar <- function(model, th, metric, test = NULL, env = NULL,
 
     if (nrow(scores) > 0) {
       if (use_jk) {
-        for (i in 1:nrow(scores)) {
+        for (i in seq_len(nrow(scores))) {
           jk_test <- suppressMessages(
             doJk(model,
                  variables = as.character(scores[i, 1]), metric = metric,
                  test = test, with_only = FALSE, return_models = TRUE,
-                 env = env, parallel = parallel))
+                 env = env))
 
           if (metric  != "aicc") {
             if (jk_test$results[1, 3] >= val_metric[1, 2]) {
@@ -206,8 +209,7 @@ reduceVar <- function(model, th, metric, test = NULL, env = NULL,
                                          variables = as.character(scores[1, 1]),
                                          metric = metric, test = test,
                                          with_only = FALSE,
-                                         return_models = TRUE, env = env,
-                                         parallel = parallel))
+                                         return_models = TRUE, env = env))
         model <- jk_test$models_without[[1]]
         train_metric[x, ] <- list(x = x - 1, y = jk_test$results[1, 2])
         if (metric != "aicc")

@@ -4,32 +4,39 @@
 \alias{plotPA}
 \title{Plot Presence Absence Map}
 \usage{
-plotPA(map, th, colors = NULL, hr = FALSE, filename = NULL,
-  format = "GTiff", ...)
+plotPA(
+  map,
+  th,
+  colors = NULL,
+  hr = FALSE,
+  filename = NULL,
+  format = "GTiff",
+  ...
+)
 }
 \arguments{
-\item{map}{\code{\link[raster]{raster}} object with the prediction.}
+\item{map}{\link[raster]{raster} object with the prediction.}
 
 \item{th}{numeric. The threshold used to convert the output in a
 presence/absence map.}
 
-\item{colors}{vector. Colors to be used, default is \code{NULL} and uses red
-and blue.}
+\item{colors}{vector. Colors to be used, default is \code{NULL} and uses red and
+blue.}
 
 \item{hr}{logical, if \code{TRUE} produces an output with high resolution,
-default is {FALSE}.}
+default is \code{FALSE}.}
 
 \item{filename}{character, if provided the raster map is saved in a file,
 default is \code{NULL}.}
 
-\item{format}{character. The output format, see
-\code{\link[raster]{writeRaster}} for all the options, default is Geotiff.}
+\item{format}{character. The output format, see \link[raster]{writeRaster}
+for all the options, default is Geotiff.}
 
-\item{...}{Additional arguments, see \code{\link{writeRaster}} for all the
+\item{...}{Additional arguments, see \link[raster]{writeRaster} for all the
 options.}
 }
 \value{
-A \code{\link[ggplot2]{ggplot}} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Plot a presence absence map using the given threshold.
@@ -41,11 +48,14 @@ plotPA(map, th = 0.8)
 # Custom colors
 plotPA(map, th = 0.5, colors = c("#d8b365", "#018571"))
 # Save the file
+\dontrun{
+# The following command will save the map in the working directory
 plotPA(map, th = 0.7, filename = "my_map", format = "ascii")
 }
 }
+}
 \seealso{
-\code{\link{plotPred}}
+\link{plotPred}.
 }
 \author{
 Sergio Vignali

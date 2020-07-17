@@ -2,32 +2,28 @@
 #'
 #' Plot the Response Curve of the given environmental variable.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-#' object.
+#' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
 #' @param var character. Name of the variable to be plotted.
 #' @param type character. The output type used for "Maxent" and "Maxnet"
-#' methods, possible values are "cloglog" and "logistic", default is
-#' \code{NULL}.
-#' @param only_presence logical, if \code{TRUE} it uses only the presence
-#' locations when applying the function for the marginal response, default is
-#' \code{FALSE}.
-#' @param marginal logical, if \code{TRUE} it plots the marginal response curve,
-#' default is \code{FALSE}.
+#' methods, possible values are "cloglog" and "logistic", default is `NULL`.
+#' @param only_presence logical, if `TRUE` it uses only the presence locations
+#' when applying the function for the marginal response, default is `FALSE`.
+#' @param marginal logical, if `TRUE` it plots the marginal response curve,
+#' default is `FALSE`.
 #' @param fun function used to compute the level of the other variables for
-#' marginal curves, default is \code{mean}.
-#' @param rug logical, if \code{TRUE} it adds the rug plot for the presence and
+#' marginal curves, default is `mean`.
+#' @param rug logical, if `TRUE` it adds the rug plot for the presence and
 #' absence/background locations, available only for continuous variables,
-#' default is \code{FALSE}.
+#' default is `FALSE`.
 #' @param color The color of the curve, default is "red".
 #'
-#' @details Note that fun is not a character argument, you must use \code{mean}
-#' and not \code{"mean"}.
+#' @details Note that fun is not a character argument, you must use `mean` and
+#' not `"mean"`.
 #'
-#' @return A \code{\link[ggplot2]{ggplot}} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #' @export
-#' @importFrom ggplot2 ggplot aes_string geom_line geom_bar scale_x_continuous
-#' geom_ribbon geom_errorbar geom_rug labs theme
-#' @importFrom raster modal
+#' @importFrom rlang .data
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @author Sergio Vignali
 #'
@@ -47,7 +43,7 @@
 #'                    env = predictors, categorical = "biome")
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", data = data, fc = "l")
+#' model <- train(method = "Maxnet", data = data, fc = "lq")
 #'
 #' # Plot cloglog response curve for a continuous environmental variable (bio1)
 #' plotResponse(model, var = "bio1", type = "cloglog")
@@ -66,7 +62,8 @@
 #' plotResponse(model, var = "biome", type = "logistic", color = "green")
 #'
 #' # Train a model with cross validation
-#' model <- train(method = "Maxnet", p = presence, a = bg, fc = "lq", rep = 4)
+#' folds <- randomFolds(data, k = 4, only_presence = TRUE)
+#' model <- train(method = "Maxnet", data = data, fc = "lq", folds = folds)
 #'
 #' # Plot cloglog response curve for a continuous environmental variable (bio17)
 #' plotResponse(model, var = "bio1", type = "cloglog")
@@ -109,14 +106,14 @@ plotResponse <- function(model, var, type = NULL, only_presence = FALSE,
                                 fun, marginal, type, categ)
 
     if (var %in% cont_vars) {
-      my_plot <- ggplot(plot_data, aes_string(x = "x", y = "y")) +
-        geom_line(colour = color)
+      my_plot <- ggplot(plot_data, aes(x = .data$x, y = .data$y)) +
+        ggplot2::geom_line(colour = color)
 
     } else {
-      my_plot <- ggplot(plot_data, aes_string(x = "x", y = "y")) +
-        geom_bar(stat = "identity", fill = color) +
-        scale_x_continuous(breaks = seq(min(plot_data$x),
-                                        max(plot_data$x), 1))
+      my_plot <- ggplot(plot_data, aes(x = .data$x, y = .data$y)) +
+        ggplot2::geom_bar(stat = "identity", fill = color) +
+        ggplot2::scale_x_continuous(breaks = seq(min(plot_data$x),
+                                                 max(plot_data$x), 1))
     }
   } else {
     nf <- length(model@models)
@@ -133,33 +130,34 @@ plotResponse <- function(model, var, type = NULL, only_presence = FALSE,
     plot_data$y_max <- plot_data$y + plot_data$sd
 
     if (var %in% cont_vars) {
-      my_plot <- ggplot(plot_data, aes_string(x = "x", y = "y", ymin = "y_min",
-                                              ymax = "y_max")) +
-        geom_line(colour = color) +
-        geom_ribbon(fill = color, alpha = 0.2)
+      my_plot <- ggplot(plot_data,
+                        aes(x = .data$x, y = .data$y, ymin = .data$y_min,
+                            ymax = .data$y_max)) +
+        ggplot2::geom_line(colour = color) +
+        ggplot2:: geom_ribbon(fill = color, alpha = 0.2)
 
     } else {
-      my_plot <- ggplot(plot_data, aes_string(x = "x", y = "y")) +
-        geom_bar(stat = "identity", fill = color) +
-        geom_errorbar(aes_string(ymin = "y_min", ymax = "y_max"),
-                      width = 0.2, size = 0.3) +
-        scale_x_continuous(breaks = seq(min(plot_data$x),
-                                        max(plot_data$x), 1))
+      my_plot <- ggplot(plot_data, aes(x = .data$x, y = .data$y)) +
+        ggplot2::geom_bar(stat = "identity", fill = color) +
+        ggplot2::geom_errorbar(aes(ymin = .data$y_min, ymax = .data$y_max),
+                               width = 0.2, size = 0.3) +
+        ggplot2::scale_x_continuous(breaks = seq(min(plot_data$x),
+                                                 max(plot_data$x), 1))
     }
   }
 
   my_plot <- my_plot +
-    labs(x = var, y = ifelse(!is.null(type), paste(type, "output"),
-                             "Probability of presence")) +
-    theme_minimal() +
-    theme(text = element_text(colour = "#666666"))
+    ggplot2::labs(x = var, y = ifelse(!is.null(type), paste(type, "output"),
+                                      "Probability of presence")) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(text = ggplot2::element_text(colour = "#666666"))
 
   if (rug == TRUE & var %in% cont_vars) {
     my_plot <- my_plot +
-      geom_rug(data = p_rug, inherit.aes = FALSE, aes_string("x"),
-               sides = "t", color = "#4C4C4C") +
-      geom_rug(data = a_rug, inherit.aes = FALSE, aes_string("x"),
-               sides = "b", color = "#4C4C4C")
+      ggplot2::geom_rug(data = p_rug, inherit.aes = FALSE, aes(.data$x),
+                        sides = "t", color = "#4C4C4C") +
+      ggplot2::geom_rug(data = a_rug, inherit.aes = FALSE, aes(.data$x),
+                        sides = "b", color = "#4C4C4C")
   }
 
   return(my_plot)

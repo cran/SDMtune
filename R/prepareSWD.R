@@ -1,22 +1,21 @@
 #' Prepare an SWD object
 #'
 #' Given the coordinates, the species' name and the environmental variables,
-#' the function creates an \code{\linkS4class{SWD}} object (sample with data).
+#' the function creates an \linkS4class{SWD} object (sample with data).
 #'
 #' @param species character. The name of the species.
-#' @param env \code{\link[raster]{stack}} containing the environmental variables
-#' used to extract the values at coordinate locations.
+#' @param env \link[raster]{stack} containing the environmental variables used
+#' to extract the values at coordinate locations.
 #' @param p data.frame. The coordinates of the presence locations.
 #' @param a data.frame. The coordinates of the absence/background locations.
 #' @param categorical vector indicating which of the environmental variable are
-#' categorical, default is \code{NULL}.
+#' categorical, default is `NULL`.
 #'
-#' @details The \code{\linkS4class{SWD}} object is created in a way that the
-#' presence locations are always before than the absence/background locations.
+#' @details The \linkS4class{SWD} object is created in a way that the presence
+#' locations are always before than the absence/background locations.
 #'
-#' @return An \code{\linkS4class{SWD}} object.
+#' @return An \linkS4class{SWD} object.
 #' @export
-#' @importFrom stats complete.cases
 #'
 #' @author Sergio Vignali
 #'
@@ -50,7 +49,7 @@ prepareSWD <- function(species, env, p = NULL, a = NULL, categorical = NULL) {
               " locations...")
       data <- as.data.frame(raster::extract(env, coords))
       # Remove any occurrence point with NA for at least one variable
-      index <- complete.cases(data)
+      index <- stats::complete.cases(data)
       discarded <- nrow(data) - sum(index)
       if (discarded > 0) {
         data <- data[index, ]

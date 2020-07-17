@@ -3,21 +3,20 @@
 #' Utility that prints the name of correlated variables and the relative
 #' correlation coefficient value.
 #'
-#' @param bg \code{\linkS4class{SWD}} object with the locations used to compute
-#' the correlation between environmental variables.
+#' @param bg \linkS4class{SWD} object with the locations used to compute the
+#' correlation between environmental variables.
 #' @param method character. The method used to compute the correlation matrix,
-#' default is "spearman".
+#' default is `spearman`.
 #' @param cor_th numeric. If provided it prints only the variables whose
 #' correlation coefficient is higher or lower than the given threshold, default
 #' is \code{NULL}.
-#' @param order logical, if \code{TRUE} the variable are ordered from the most
-#' to the less highly correlated, default is \code{TRUE}.
-#' @param remove_diagonal logical, if \code{TRUE} the values in the diagonal
-#' are, removed, default is \code{TRUE}.
+#' @param order logical, if `TRUE` the variable are ordered from the most to the
+#' less highly correlated, default is `TRUE`.
+#' @param remove_diagonal logical, if `TRUE` the values in the diagonal are,
+#' removed, default is `TRUE`.
 #'
 #' @return The name of the correlated variables.
 #' @export
-#' @importFrom stats cor
 #'
 #' @author Sergio Vignali
 #'
@@ -56,7 +55,7 @@ corVar <- function(bg, method = "spearman", cor_th = NULL, order = TRUE,
   # Remove categorical environmental variables
   categorical <- names(Filter(is.factor, df))
   df[categorical] <- list(NULL)
-  cor_matrix <- cor(df, method = method)
+  cor_matrix <- stats::cor(df, method = method)
   # Remove lower triangle
   cor_matrix[lower.tri(cor_matrix, diag = remove_diagonal)] <- NA
   if (!is.null(cor_th))

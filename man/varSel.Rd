@@ -4,29 +4,35 @@
 \alias{varSel}
 \title{Variable Selection}
 \usage{
-varSel(model, metric, bg4cor, test = NULL, env = NULL,
-  parallel = FALSE, method = "spearman", cor_th = 0.7, permut = 10,
-  use_pc = FALSE)
+varSel(
+  model,
+  metric,
+  bg4cor,
+  test = NULL,
+  env = NULL,
+  parallel = FALSE,
+  method = "spearman",
+  cor_th = 0.7,
+  permut = 10,
+  use_pc = FALSE
+)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
 \item{metric}{character. The metric used to evaluate the models, possible
 values are: "auc", "tss" and "aicc".}
 
-\item{bg4cor}{\code{\linkS4class{SWD}} object. Background locations used to
-test the correlation between environmental variables.}
+\item{bg4cor}{\linkS4class{SWD} object. Background locations used to test the
+correlation between environmental variables.}
 
-\item{test}{\code{\linkS4class{SWD}}. Test dataset used to evaluate the
-model, not used with aicc and \code{\linkS4class{SDMmodelCV}} objects,
-default is \code{NULL}.}
+\item{test}{\linkS4class{SWD}. Test dataset used to evaluate the model, not
+used with aicc and \linkS4class{SDMmodelCV} objects, default is \code{NULL}.}
 
-\item{env}{\code{\link[raster]{stack}} containing the environmental
-variables, used only with "aicc", default is \code{NULL}.}
+\item{env}{\link[raster]{stack} containing the environmental variables, used
+only with "aicc", default is \code{NULL}.}
 
-\item{parallel}{logical, if \code{TRUE} it uses parallel computation, default
-is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.}
+\item{parallel}{deprecated.}
 
 \item{method}{character. The method used to compute the correlation matrix,
 default "spearman".}
@@ -36,14 +42,14 @@ correlated variables, default is 0.7.}
 
 \item{permut}{integer. Number of permutations, default is 10.}
 
-\item{use_pc}{logical, use percent contribution. If \code{TRUE} and the model
-is trained using the \code{\link{Maxent}} method, the algorithm uses the
-percent contribution computed by Maxent software to score the variable
-importance, default is \code{FALSE}.}
+\item{use_pc}{logical, use percent contribution. If \code{TRUE} and the model is
+trained using the \linkS4class{Maxent} method, the algorithm uses the percent
+contribution computed by Maxent software to score the variable importance,
+default is \code{FALSE}.}
 }
 \value{
-The \code{\linkS4class{SDMmodel}} or \code{\linkS4class{SDMmodelCV}}
-object trained using the selected variables.
+The \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object trained
+using the selected variables.
 }
 \description{
 The function performs a data-driven variable selection. Starting from the
@@ -58,10 +64,6 @@ correlated anymore.
 }
 \details{
 \itemize{
-\item Parallel computation is used only during the execution of the
-predict function,  and increases the speed only for large datasets. For small
-dataset it may result in a longer execution, due to the time necessary to
-create the cluster.
 \item To find highly correlated variables the following formula is used:
 \deqn{| coeff | \le cor_th}
 }
@@ -89,11 +91,13 @@ test <- datasets[[2]]
 # Train a model
 model <- train(method = "Maxnet", data = train, fc = "l")
 
-# Prepare background locations to test autocorrelation
+# Prepare background locations to test autocorrelation, this usually gives a
+# warning message given that less than 10000 points can be randomly sampled
 bg_coords <- dismo::randomPoints(predictors, 10000)
 bg <- prepareSWD(species = "Virtual species", a = bg_coords,
                  env = predictors, categorical = "biome")
 
+\dontrun{
 # Remove variables with correlation higher than 0.7 accounting for the AUC,
 # in the following example the variable importance is computed as permutation
 # importance
@@ -105,6 +109,9 @@ vs
 # in the following example the variable importance is the MaxEnt percent
 # contribution
 # Train a model
+# The next line checks if Maxent is correctly configured but you don't need
+# to run it in your script
+if (checkMaxentInstallation(verbose = FALSE)) {
 model <- train(method = "Maxent", data = train, fc = "l")
 vs <- varSel(model, metric = "tss", bg4cor = bg, test = test, cor_th = 0.7,
              use_pc = TRUE)
@@ -116,6 +123,8 @@ vs
 vs <- varSel(model, metric = "aicc", bg4cor = bg, cor_th = 0.7,
              use_pc = TRUE, env = predictors)
 vs
+}
+}
 }
 }
 \author{

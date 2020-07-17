@@ -7,19 +7,18 @@
 plotPred(map, lt = "", colorramp = NULL, hr = FALSE)
 }
 \arguments{
-\item{map}{\code{\link[raster]{raster}} object with the prediction.}
+\item{map}{\link[raster]{raster} object with the prediction.}
 
 \item{lt}{character. Legend title, default is an empty string.}
 
 \item{colorramp}{vector. A custom color ramp given as a vector of colors
-(see example), default is \code{NULL} and uses a color ramp similar to the
-original MaxEnt output.}
+(see example), default is \code{NULL} and uses a blue/red color ramp.}
 
 \item{hr}{logical, if \code{TRUE} produces an output with high resolution,
 default is \code{FALSE}.}
 }
 \value{
-A \code{\link[ggplot2]{ggplot}} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Plot Prediction output.
@@ -27,14 +26,14 @@ Plot Prediction output.
 \examples{
 \donttest{
 map <- raster::raster(matrix(runif(400, 0, 1), 20, 20))
-plotPred(map, lt = "Habitat suitability \\ncloglog")
+plotPred(map, lt = "Habitat suitability \ncloglog")
 # Custom colors
 plotPred(map, lt = "Habitat suitability",
          colorramp = c("#2c7bb6", "#ffffbf", "#d7191c"))
 }
 }
 \seealso{
-\code{\link{plotPA}}
+\link{plotPA}.
 }
 \author{
 Sergio Vignali

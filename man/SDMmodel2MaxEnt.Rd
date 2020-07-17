@@ -7,15 +7,14 @@
 SDMmodel2MaxEnt(model)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} object to be converted.}
+\item{model}{\linkS4class{SDMmodel} object to be converted.}
 }
 \value{
-The converted dismo \code{\linkS4class{MaxEnt}} object.
+The converted dismo \linkS4class{MaxEnt} object.
 }
 \description{
-Converts an \code{\linkS4class{SDMmodel}} object containing a
-\code{\linkS4class{Maxent}} model into a dismo \code{\linkS4class{MaxEnt}}
-object.
+Converts an \linkS4class{SDMmodel} object containing a \linkS4class{Maxent}
+model into a dismo \linkS4class{MaxEnt} object.
 }
 \examples{
 \donttest{
@@ -33,10 +32,14 @@ data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
                    env = predictors, categorical = "biome")
 
 # Train a Maxent model
+# The next line checks if Maxent is correctly configured but you don't need
+# to run it in your script
+if (checkMaxentInstallation(verbose = FALSE)) {
 model <- train(method = "Maxent", data = data, fc = "l")
 
 dismo_model <- SDMmodel2MaxEnt(model)
 dismo_model
+}
 }
 
 }

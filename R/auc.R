@@ -2,18 +2,17 @@
 #'
 #' Compute the AUC using the Man-Whitney U Test formula.
 #'
-#' @param model \code{\linkS4class{SDMmodel}} or
-#' \code{\linkS4class{SDMmodelCV}} objects.
-#' @param test \code{\linkS4class{SWD}} object for \code{\linkS4class{SDMmodel}}
-#' object. Logical or \code{\linkS4class{SWD}} object for
-#' \code{\linkS4class{SDMmodelCV}} objects, if not provided it computes the
-#' train AUC, see details. Default is \code{NULL}.
+#' @param model An \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
+#' @param test \linkS4class{SWD} object when `model` is an
+#' \linkS4class{SDMmodel} object; logical or \linkS4class{SWD} object when
+#' `model` is an \linkS4class{SDMmodelCV} object. If not provided it computes
+#' the training AUC, see details. Default is `NULL`.
 #'
-#' @details For \code{\linkS4class{SDMmodelCV}} objects, the function computes
-#' the mean of the training AUC values of the k-folds. If \code{test = TRUE} it
-#' computes the mean of the testing AUC values for the k-folds. If test is an
-#' \code{\linkS4class{SWD}} object, it computes the mean AUC values for the
-#' provided testing dataset.
+#' @details For \linkS4class{SDMmodelCV} objects, the function computes the mean
+#' of the training AUC values of the k-folds. If `test = TRUE` it computes the
+#' mean of the testing AUC values for the k-folds. If test is an
+#' \linkS4class{SWD} object, it computes the mean AUC values for the provided
+#' testing dataset.
 #'
 #' @return The value of the AUC.
 #' @export
@@ -24,6 +23,8 @@
 #' operating characteristics (ROC) and relative operating levels (ROL) curves:
 #' Statistical significance and interpretation. Q.J.R. Meteorol. Soc., 128:
 #' 2145-2166.
+#'
+#' @seealso \link{aicc} and \link{tss}.
 #'
 #' @examples
 #' # Acquire environmental variables
@@ -75,7 +76,7 @@ auc <- function(model, test = NULL) {
     auc <- .compute_auc(model, test)
   } else {
     aucs <- vector("numeric", length = length(model@models))
-    for (i in 1:length(model@models)) {
+    for (i in seq_along(model@models)) {
 
       if (!is.null(test)) {
         if (isTRUE(test)) {
@@ -84,7 +85,7 @@ auc <- function(model, test = NULL) {
           test_swd <- test
         }
       } else {
-        test_swd = NULL
+        test_swd <- NULL
       }
 
       aucs[i] <- .compute_auc(model@models[[i]], test_swd)

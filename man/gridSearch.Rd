@@ -4,12 +4,18 @@
 \alias{gridSearch}
 \title{Grid Search}
 \usage{
-gridSearch(model, hypers, metric, test = NULL, env = NULL,
-  parallel = FALSE, save_models = TRUE)
+gridSearch(
+  model,
+  hypers,
+  metric,
+  test = NULL,
+  env = NULL,
+  parallel = FALSE,
+  save_models = TRUE
+)
 }
 \arguments{
-\item{model}{\code{\linkS4class{SDMmodel}} or code{\linkS4class{SDMmodelCV}}
-object.}
+\item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
 
 \item{hypers}{named list containing the values of the hyperparameters that
 should be tuned, see details.}
@@ -17,23 +23,22 @@ should be tuned, see details.}
 \item{metric}{character. The metric used to evaluate the models, possible
 values are: "auc", "tss" and "aicc".}
 
-\item{test}{code{\linkS4class{SWD}} object. Test dataset used to evaluate the
-model, not used with \code{\link{aicc}} and code{\linkS4class{SDMmodelCV}}
-objects, default is \code{NULL}.}
+\item{test}{\linkS4class{SWD} object. Testing dataset used to evaluate the
+model, not used with \link{aicc} and \linkS4class{SDMmodelCV} objects,
+default is \code{NULL}.}
 
-\item{env}{\code{\link[raster]{stack}} containing the environmental
-variables, used only with "aicc", default is \code{NULL}.}
+\item{env}{\link[raster]{stack} containing the environmental variables, used
+only with "aicc", default is \code{NULL}.}
 
-\item{parallel}{logical, if \code{TRUE} it uses parallel computation, default
-is \code{FALSE}. Used only with \code{metric = "aicc"}, see details.}
+\item{parallel}{deprecated.}
 
 \item{save_models}{logical, if \code{FALSE} the models are not saved and the
 output contains only a data frame with the metric values for each
-hyperparameter combination. Default is \code{TRUE}, set it to \code{FALSE}
-when there are many combinations to avoid R crashing for memory overload.}
+hyperparameter combination. Default is \code{TRUE}, set it to \code{FALSE} when there
+are many combinations to avoid R crashing for memory overload.}
 }
 \value{
-code{\linkS4class{SDMtune}} object.
+\linkS4class{SDMtune} object.
 }
 \description{
 Given a set of possible hyperparameter values, the function trains models
@@ -42,13 +47,8 @@ with all the possible combinations of hyperparameters.
 \details{
 \itemize{
 \item To know which hyperparameters can be tuned you can use the output
-of the function \code{\link{get_tunable_args}}. Hyperparameters not included
-in the \code{hypers} argument take the value that they have in the passed
-model.
-\item Parallel computation is used only during the execution of the predict
-function, and increases the speed only for large datasets. For small dataset
-it may result in a longer execution, due to the time necessary to create the
-cluster.
+of the function \link{getTunableArgs}. Hyperparameters not included in the
+\code{hypers} argument take the value that they have in the passed model.
 }
 }
 \examples{
@@ -93,7 +93,7 @@ output@results
 }
 }
 \seealso{
-\code{\link{randomSearch}} and \code{\link{optimizeModel}}.
+\link{randomSearch} and \link{optimizeModel}.
 }
 \author{
 Sergio Vignali

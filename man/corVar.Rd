@@ -4,25 +4,30 @@
 \alias{corVar}
 \title{Print Correlated Variables}
 \usage{
-corVar(bg, method = "spearman", cor_th = NULL, order = TRUE,
-  remove_diagonal = TRUE)
+corVar(
+  bg,
+  method = "spearman",
+  cor_th = NULL,
+  order = TRUE,
+  remove_diagonal = TRUE
+)
 }
 \arguments{
-\item{bg}{\code{\linkS4class{SWD}} object with the locations used to compute
-the correlation between environmental variables.}
+\item{bg}{\linkS4class{SWD} object with the locations used to compute the
+correlation between environmental variables.}
 
 \item{method}{character. The method used to compute the correlation matrix,
-default is "spearman".}
+default is \code{spearman}.}
 
 \item{cor_th}{numeric. If provided it prints only the variables whose
 correlation coefficient is higher or lower than the given threshold, default
 is \code{NULL}.}
 
-\item{order}{logical, if \code{TRUE} the variable are ordered from the most
-to the less highly correlated, default is \code{TRUE}.}
+\item{order}{logical, if \code{TRUE} the variable are ordered from the most to the
+less highly correlated, default is \code{TRUE}.}
 
-\item{remove_diagonal}{logical, if \code{TRUE} the values in the diagonal
-are, removed, default is \code{TRUE}.}
+\item{remove_diagonal}{logical, if \code{TRUE} the values in the diagonal are,
+removed, default is \code{TRUE}.}
 }
 \value{
 The name of the correlated variables.

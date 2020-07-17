@@ -1,14 +1,17 @@
 setClassUnion("model", c("Maxent", "Maxnet", "ANN", "RF", "BRT"))
 #' SDMmodel
 #'
-#' This Class represents an SDMmodel model object and hosts all the information
+#' This Class represents an SDMmodel object and hosts all the information
 #' related to the model.
 #'
-#' @slot data \code{\linkS4class{SWD}} object. The data used to train the model.
-#' @slot model \link{Maxent} or \link{Maxnet} object.
+#' @slot data \linkS4class{SWD} object. The data used to train the model.
+#' @slot model An object of class \linkS4class{ANN}, \linkS4class{BRT},
+#' \linkS4class{RF}, \linkS4class{Maxent} or \linkS4class{Maxnet}.
 #'
+#' @aliases NULL SDMmodel-class
 #' @include SWD-class.R Maxent-class.R Maxnet-class.R RF-class.R BRT-class.R
-#' @exportClass SDMmodel
+#' ANN-class.R
+#' @export
 #'
 #' @author Sergio Vignali
 SDMmodel <- setClass("SDMmodel",
@@ -22,7 +25,7 @@ setMethod(
   signature = "SDMmodel",
   definition = function(object) {
 
-    tunable_hypers <- get_tunable_args(object)
+    tunable_hypers <- getTunableArgs(object)
     cont_vars <- names(Filter(is.numeric, object@data@data))
     if (length(cont_vars) == 0)
       cont_vars <- NA
@@ -40,9 +43,9 @@ setMethod(
     cat("Model configurations:\n")
     cat("--------------------\n")
 
-    for (i in 1:length(tunable_hypers)) {
+    for (i in seq_along(tunable_hypers)) {
       if (tunable_hypers[i] == "a") {
-        next()
+        next
       } else {
         h <- slot(object@model, tunable_hypers[i])
         cat(tunable_hypers[i], ": ", h, "\n", sep = "")

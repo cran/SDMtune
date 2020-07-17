@@ -6,7 +6,7 @@
 #' @slot results data.frame. Results with the evaluation of the models.
 #' @slot models list. List of \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV}
 #' objects.
-#'
+#' @aliases NULL SDMtune-class
 #' @export
 #'
 #' @author Sergio Vignali
@@ -19,14 +19,14 @@ setMethod("show",
   signature = "SDMtune",
   definition = function(object) {
 
-    tunable_hypers <- get_tunable_args(object@models[[1]])
+    tunable_hypers <- getTunableArgs(object@models[[1]])
 
     cat("Object of class: ", class(object), "\n\n")
 
     cat("Models configuration:\n")
     cat("--------------------\n")
 
-    for (i in 1:length(tunable_hypers)) {
+    for (i in seq_along(tunable_hypers)) {
       h <- paste(sort(unique(object@results[, tunable_hypers[i]])),
                  collapse = ", ")
       cat(tunable_hypers[i], ": ", h, "\n", sep = "")
@@ -48,9 +48,8 @@ if (!isGeneric("plot"))
 #' \code{FALSE}.
 #'
 #' @rdname plot-methods
-#' @importFrom graphics plot
-#' @importFrom ggplot2 ggplot aes_string geom_point labs scale_color_manual
-#' theme_minimal theme element_text geom_line
+#' @importFrom rlang .data
+#' @importFrom ggplot2 ggplot aes
 #' @exportMethod plot
 #'
 #' @return If \code{interactive = FALSE} the function returns a

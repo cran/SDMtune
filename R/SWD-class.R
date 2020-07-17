@@ -8,13 +8,14 @@
 #' @slot coords data.frame. Coordinates of the locations.
 #' @slot data data.frame. Value of the environmental variables at location
 #' sites.
-#' @slot pa numeric. Vector with \code{1} for presence and \code{0} for
-#' absence/background locations.
+#' @slot pa numeric. Vector with `1` for presence and `0` for absence/background
+#' locations.
 #'
 #' @details The object can contains presence/absence, presence/background,
-#' presence only or absence/background only data. Use the
-#' \code{\link{prepareSWD}} function to create the object.
+#' presence only or absence/background only data. Use the \link{prepareSWD}
+#' function to create the object.
 #'
+#' @aliases NULL SWD-class
 #' @export
 #'
 #' @author Sergio Vignali
@@ -59,5 +60,5 @@ setMethod(
     cat("Variables:\n")
     cat("---------\n")
     cat("Continuous:", cont_vars, "\n")
-    cat("Categorical:", cat_vars , "\n")
+    cat("Categorical:", cat_vars, "\n")
   })

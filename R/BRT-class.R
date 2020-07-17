@@ -10,11 +10,12 @@ setOldClass("gbm")
 #' @slot shrinkage numeric. The shrinkage parameter.
 #' @slot bag.fraction numeric. Random fraction of data used in the tree
 #' expansion.
-#' @slot model \code{\link{gbm}}. The Boosted Regression Tree model object.
+#' @slot model \link{gbm}. The Boosted Regression Tree model object.
 #'
-#' @details See \code{\link{gbm}} for the meaning of the slots.
+#' @details See \link{gbm} for the meaning of the slots.
 #'
-#' @exportClass BRT
+#' @aliases NULL BRT-class
+#' @export
 #'
 #' @author Sergio Vignali
 BRT <- setClass("BRT",
