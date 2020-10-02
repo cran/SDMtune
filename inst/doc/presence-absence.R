@@ -1,8 +1,8 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
                       fig.align = "center")
 
-## ----load data-----------------------------------------------------------
+## ----load data----------------------------------------------------------------
 #  library(SDMtune)
 #  library(zeallot)
 #  
@@ -23,29 +23,29 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  # Create folds
 #  folds <- randomFolds(train, k = 4, seed = 25)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  set.seed(25)
 #  model <- train("ANN", data = train, size = 10, folds = folds)
 #  model
 
-## ----auc-----------------------------------------------------------------
+## ----auc----------------------------------------------------------------------
 #  auc(model)
 #  auc(model, test = TRUE)
 
-## ----get tunable args----------------------------------------------------
+## ----get tunable args---------------------------------------------------------
 #  getTunableArgs(model)
 
-## ----optimize model------------------------------------------------------
+## ----optimize model-----------------------------------------------------------
 #  h <- list(size = 10:50, decay = c(0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5),
 #            maxit = c(50, 100, 300, 500))
 #  
 #  om <- optimizeModel(model, hypers = h, metric = "auc", seed = 25)
 
-## ----best model----------------------------------------------------------
+## ----best model---------------------------------------------------------------
 #  best_model <- om@models[[1]]
 #  om@results[1, ]
 
-## ----evaluate final model, fig.align="center"----------------------------
+## ----evaluate final model, fig.align="center"---------------------------------
 #  set.seed(25)
 #  final_model <- train("ANN", data = train, size = om@results[1, 1],
 #                       decay = om@results[1, 2], maxit = om@results[1, 4])

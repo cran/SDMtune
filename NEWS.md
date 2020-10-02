@@ -1,3 +1,8 @@
+# SDMtune 1.1.2
+* Removed deprecated function `get_tunable_args()`.
+* Removed deprecated argument "parallel" form functions.
+* Updated citation text
+
 # SDMtune 1.1.1
 Main changes:
 * New function `checkMaxentInstallation()` to check if Maxent is correctly configured.

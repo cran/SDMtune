@@ -1,23 +1,23 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
                       fig.align = "center")
 
-## ----load pkgs-----------------------------------------------------------
+## ----load pkgs----------------------------------------------------------------
 #  library(ggplot2)    # To plot locations
 #  library(maps)       # To access useful maps
 #  library(rasterVis)  # To plot raster objects
 
-## ----get predictors------------------------------------------------------
+## ----get predictors-----------------------------------------------------------
 #  files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
 #                      pattern = "grd", full.names = TRUE)
 
-## ----create raster stack-------------------------------------------------
+## ----create raster stack------------------------------------------------------
 #  predictors <- raster::stack(files)
 
-## ----names predicrtors---------------------------------------------------
+## ----names predicrtors--------------------------------------------------------
 #  names(predictors)
 
-## ----plot bio1-----------------------------------------------------------
+## ----plot bio1----------------------------------------------------------------
 #  gplot(predictors$bio1) +
 #      geom_tile(aes(fill = value)) +
 #      coord_equal() +
@@ -34,15 +34,15 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #            axis.ticks.x = element_blank(),
 #            axis.ticks.y = element_blank())
 
-## ----load SDMtune--------------------------------------------------------
+## ----load SDMtune-------------------------------------------------------------
 #  library(SDMtune)
 
-## ----help dataset--------------------------------------------------------
+## ----help dataset-------------------------------------------------------------
 #  help(virtualSp)
 #  p_coords <- virtualSp$presence
 #  bg_coords <- virtualSp$background
 
-## ----plot presence-------------------------------------------------------
+## ----plot presence------------------------------------------------------------
 #  ggplot(map_data("world"), aes(long, lat)) +
 #      geom_polygon(aes(group = group), fill = "grey95", color = "gray40", size = 0.2) +
 #      geom_jitter(data = p_coords, aes(x = x, y = y), color = "red",
@@ -54,7 +54,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #      scale_x_continuous(limits = c(-125, -32)) +
 #      scale_y_continuous(limits = c(-56, 40))
 
-## ----plot bg_model locations---------------------------------------------
+## ----plot bg_model locations--------------------------------------------------
 #  ggplot(map_data("world"), aes(long, lat)) +
 #      geom_polygon(aes(group = group), fill = "grey95", color = "gray40", size = 0.2) +
 #      geom_jitter(data = as.data.frame(bg_coords), aes(x = x, y = y),
@@ -66,119 +66,119 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #      scale_x_continuous(limits = c(-125, -32)) +
 #      scale_y_continuous(limits = c(-56, 40))
 
-## ----prepare SWD---------------------------------------------------------
+## ----prepare SWD--------------------------------------------------------------
 #  data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
 #                     env = predictors, categorical = "biome")
 #  
 
-## ----show SWD object-----------------------------------------------------
+## ----show SWD object----------------------------------------------------------
 #  data
 
-## ----show data-----------------------------------------------------------
+## ----show data----------------------------------------------------------------
 #  head(data@data)
 
-## ----show coords data----------------------------------------------------
+## ----show coords data---------------------------------------------------------
 #  head(data@coords)
 
-## ----show species--------------------------------------------------------
+## ----show species-------------------------------------------------------------
 #  data@species
 
-## ----save SWD single, eval=FALSE-----------------------------------------
+## ----save SWD single, eval=FALSE----------------------------------------------
 #  swd2csv(data, file_name = "data.csv")
 
-## ----save SWDdouble, eval=FALSE------------------------------------------
+## ----save SWDdouble, eval=FALSE-----------------------------------------------
 #  swd2csv(data, file_name = c("presence.csv", "background.csv"))
 
-## ----train---------------------------------------------------------------
+## ----train--------------------------------------------------------------------
 #  model <- train(method = "Maxent", data = data)
 
-## ----print model---------------------------------------------------------
+## ----print model--------------------------------------------------------------
 #  model
 
-## ----get slots-----------------------------------------------------------
+## ----get slots----------------------------------------------------------------
 #  slotNames(model)
 
-## ----model slots---------------------------------------------------------
+## ----model slots--------------------------------------------------------------
 #  slotNames(model@model)
 
-## ----retrain-------------------------------------------------------------
+## ----retrain------------------------------------------------------------------
 #  model <- train(method = "Maxent", data = data, fc = "lqph", reg = 1, iter = 500)
 
-## ----model witout default arguments--------------------------------------
+## ----model witout default arguments-------------------------------------------
 #  model <- train(method = "Maxent", data = data, fc = "lh", reg = 0.5, iter = 700)
 
-## ----predict train-------------------------------------------------------
+## ----predict train------------------------------------------------------------
 #  pred <- predict(model, data = data, type = "cloglog")
 
-## ----print pred----------------------------------------------------------
+## ----print pred---------------------------------------------------------------
 #  head(pred)
 
-## ----predict presence----------------------------------------------------
+## ----predict presence---------------------------------------------------------
 #  p <- data@data[data@pa == 1, ]
 #  pred <- predict(model, data = p, type = "cloglog")
 #  tail(pred)
 
-## ----predict raster------------------------------------------------------
+## ----predict raster-----------------------------------------------------------
 #  map <- predict(model, data = predictors, type = "cloglog")
 
-## ----print raster output-------------------------------------------------
+## ----print raster output------------------------------------------------------
 #  map
 
-## ----save map, eval=FALSE------------------------------------------------
+## ----save map, eval=FALSE-----------------------------------------------------
 #  map <- predict(model, data = predictors, type = "cloglog", file = "my_map",
 #                 format = "GTiff")
 
-## ----exercise------------------------------------------------------------
+## ----exercise-----------------------------------------------------------------
 #  # First create the extent that surrounds Cile
 #  e = raster::extent(c(-77, -60, -56, -15))
 #  # Now use the extent to make the prediction
 #  map_e <- predict(model, data = predictors, type = "cloglog", extent = e)
 
-## ----plot map default----------------------------------------------------
+## ----plot map default---------------------------------------------------------
 #  plotPred(map)
 
-## ----plot map custom-----------------------------------------------------
+## ----plot map custom----------------------------------------------------------
 #  plotPred(map, lt = "Habitat\nsuitability",
 #           colorramp = c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"))
 
-## ----thresholds----------------------------------------------------------
+## ----thresholds---------------------------------------------------------------
 #  ths <- thresholds(model, type = "cloglog")
 #  ths
 
-## ----plot pa-------------------------------------------------------------
+## ----plot pa------------------------------------------------------------------
 #  plotPA(map, th = ths[3, 2])
 
-## ----plot and save pa, eval=FALSE----------------------------------------
+## ----plot and save pa, eval=FALSE---------------------------------------------
 #  plotPA(map, th = ths[3, 2], filename = "my_pa_map", format = "GTiff")
 
-## ----auc-----------------------------------------------------------------
+## ----auc----------------------------------------------------------------------
 #  auc(model)
 
-## ----plot roc------------------------------------------------------------
+## ----plot roc-----------------------------------------------------------------
 #  plotROC(model)
 
-## ----tss-----------------------------------------------------------------
+## ----tss----------------------------------------------------------------------
 #  tss(model)
 
-## ----aicc----------------------------------------------------------------
+## ----aicc---------------------------------------------------------------------
 #  aicc(model, env = predictors)
 
-## ----train test----------------------------------------------------------
+## ----train test---------------------------------------------------------------
 #  library(zeallot)  # For unpacking assignment
 #  c(train, test) %<-% trainValTest(data, test = 0.2, only_presence = TRUE,
 #                                   seed = 25)
 
-## ----trai with train dataset---------------------------------------------
+## ----trai with train dataset--------------------------------------------------
 #  model <- train("Maxent", data = train)
 
-## ----evaluate test-------------------------------------------------------
+## ----evaluate test------------------------------------------------------------
 #  auc(model)
 #  auc(model, test = test)
 
-## ----plot AUC train/test-------------------------------------------------
+## ----plot AUC train/test------------------------------------------------------
 #  plotROC(model, test = test)
 
-## ----experiment----------------------------------------------------------
+## ----experiment---------------------------------------------------------------
 #  # Create an empty data.frame
 #  output <- data.frame(matrix(NA, nrow = 10, ncol = 3))
 #  colnames(output) <- c("seed", "trainAUC", "testAUC")
@@ -204,25 +204,25 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  # compute the range of the testing AUC
 #  range(output[, 3])
 
-## ----random folds--------------------------------------------------------
+## ----random folds-------------------------------------------------------------
 #  folds <- randomFolds(data, k = 4, only_presence = TRUE, seed = 25)
 
-## ----cv, eval=FALSE------------------------------------------------------
+## ----cv, eval=FALSE-----------------------------------------------------------
 #  cv_model <- train("Maxent", data = data, folds = folds)
 #  cv_model
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  auc(cv_model)
 #  auc(cv_model, test = TRUE)
 
-## ----enmeval block-------------------------------------------------------
+## ----enmeval block------------------------------------------------------------
 #  library(ENMeval)
 #  block_folds <- get.block(occ = data@coords[data@pa == 1, ],
 #                           bg.coords = data@coords[data@pa == 0, ])
 #  model <- train(method = "Maxent", data = data, fc = "l", reg = 0.8,
 #                 folds = block_folds)
 
-## ----enmeval checherboard1-----------------------------------------------
+## ----enmeval checherboard1----------------------------------------------------
 #  cb_folds <- get.checkerboard1(occ = data@coords[data@pa == 1, ],
 #                                env = predictors,
 #                                bg.coords = data@coords[data@pa == 0, ],
@@ -230,7 +230,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  model <- train(method = "Maxent", data = data, fc = "l", reg = 0.8,
 #                 folds = cb_folds)
 
-## ----blockCV-------------------------------------------------------------
+## ----blockCV------------------------------------------------------------------
 #  library(blockCV)
 #  library(raster)
 #  # Create spatial points data frame
