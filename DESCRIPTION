@@ -1,7 +1,7 @@
 Package: SDMtune
 Type: Package
 Title: Species Distribution Model Selection
-Version: 1.1.2
+Version: 1.1.3
 Authors@R: c(
 	  person("Sergio", "Vignali",  email = "sergio.vignali@iee.unibe.ch",
 	         role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3390-5442")),
@@ -21,9 +21,9 @@ License: GPL-3
 URL: https://consbiol-unibern.github.io/SDMtune/,
         https://github.com/ConsBiol-unibern/SDMtune
 BugReports: https://github.com/ConsBiol-unibern/SDMtune/issues
-SystemRequirements: Java JDK and maxent.jar >= 3.4.1 to use Maxent
+SystemRequirements: Java (>= 8) and maxent.jar >= 3.4.1 to use Maxent
 Depends: R (>= 3.6.0)
-Imports: dismo (>= 1.1-4), gbm (>= 2.1.5), ggplot2 (>= 3.3.1), jsonlite
+Imports: dismo (>= 1.3-3), gbm (>= 2.1.5), ggplot2 (>= 3.3.1), jsonlite
         (>= 1.6), maxnet (>= 0.1.2), methods, nnet (>= 7.3-12),
         progress (>= 1.2.2), randomForest (>= 4.6-14), raster (>=
         2.9-5), Rcpp (>= 1.0.1), rlang (>= 0.4.5), rstudioapi (>=
@@ -57,11 +57,11 @@ Collate: 'ANN-class.R' 'BRT-class.R' 'Maxent-class.R' 'Maxnet-class.R'
         'tss.R' 'utils.R' 'varImp.R' 'varSel.R' 'virtualSp.R' 'zzz.R'
 Language: en-US
 NeedsCompilation: yes
-Packaged: 2020-10-02 10:47:45 UTC; vignali
+Packaged: 2020-11-24 09:22:58 UTC; vignali
 Author: Sergio Vignali [aut, cre] (<https://orcid.org/0000-0002-3390-5442>),
   Arnaud Barras [aut] (<https://orcid.org/0000-0003-0850-6965>),
   Veronika Braunisch [aut] (<https://orcid.org/0000-0001-7035-4662>),
   Conservation Biology - University of Bern [fnd]
 Maintainer: Sergio Vignali <sergio.vignali@iee.unibe.ch>
 Repository: CRAN
-Date/Publication: 2020-10-02 11:12:06 UTC
+Date/Publication: 2020-11-24 10:30:05 UTC
