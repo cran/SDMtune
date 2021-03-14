@@ -1,4 +1,6 @@
 skip_on_cran()
+skip_on_ci()
+skip_on_covr()
 
 folder <- "trash"
 m <- SDMtune:::bm_maxnet
