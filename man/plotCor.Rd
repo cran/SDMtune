@@ -9,11 +9,10 @@ plotCor(bg, method = "spearman", cor_th = NULL)
 \arguments{
 \item{bg}{\linkS4class{SWD} object used to compute the correlation matrix.}
 
-\item{method}{character. The method used to compute the correlation matrix,
-default is "spearman".}
+\item{method}{character. The method used to compute the correlation matrix.}
 
 \item{cor_th}{numeric. If provided it prints only the coefficients that are
-higher or lower than the given threshold, default is \code{NULL}.}
+higher or lower than the given threshold.}
 }
 \value{
 A \link[ggplot2]{ggplot} object.
@@ -28,21 +27,33 @@ threshold.
 \donttest{
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+                    pattern = "grd",
+                    full.names = TRUE)
+
+predictors <- terra::rast(files)
 
 # Prepare background locations
-bg_coords <- dismo::randomPoints(predictors, 10000)
+bg_coords <- terra::spatSample(predictors,
+                               size = 9000,
+                               method = "random",
+                               na.rm = TRUE,
+                               xy = TRUE,
+                               values = FALSE)
 
 # Create SWD object
-bg <- prepareSWD(species = "Virtual species", a = bg_coords,
-                 env = predictors, categorical = "biome")
+bg <- prepareSWD(species = "Virtual species",
+                 a = bg_coords,
+                 env = predictors,
+                 categorical = "biome")
 
 # Plot heat map
-plotCor(bg, method = "spearman")
+plotCor(bg,
+        method = "spearman")
 
 # Plot heat map showing only values higher than given threshold
-plotCor(bg, method = "spearman", cor_th = 0.8)
+plotCor(bg,
+        method = "spearman",
+        cor_th = 0.8)
 }
 }
 \author{

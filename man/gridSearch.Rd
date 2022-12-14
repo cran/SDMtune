@@ -4,7 +4,16 @@
 \alias{gridSearch}
 \title{Grid Search}
 \usage{
-gridSearch(model, hypers, metric, test = NULL, env = NULL, save_models = TRUE)
+gridSearch(
+  model,
+  hypers,
+  metric,
+  test = NULL,
+  env = NULL,
+  save_models = TRUE,
+  interactive = TRUE,
+  progress = TRUE
+)
 }
 \arguments{
 \item{model}{\linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.}
@@ -16,16 +25,19 @@ should be tuned, see details.}
 values are: "auc", "tss" and "aicc".}
 
 \item{test}{\linkS4class{SWD} object. Testing dataset used to evaluate the
-model, not used with \link{aicc} and \linkS4class{SDMmodelCV} objects,
-default is \code{NULL}.}
+model, not used with \link{aicc} and \linkS4class{SDMmodelCV} objects.}
 
-\item{env}{\link[raster]{stack} containing the environmental variables, used
-only with "aicc", default is \code{NULL}.}
+\item{env}{\link[terra]{rast} containing the environmental variables, used
+only with "aicc".}
 
-\item{save_models}{logical, if \code{FALSE} the models are not saved and the
+\item{save_models}{logical. If \code{FALSE} the models are not saved and the
 output contains only a data frame with the metric values for each
-hyperparameter combination. Default is \code{TRUE}, set it to \code{FALSE} when there
-are many combinations to avoid R crashing for memory overload.}
+hyperparameter combination. Set it to \code{FALSE} when there are many
+combinations to avoid R crashing for memory overload.}
+
+\item{interactive}{logical. If \code{FALSE} the interactive chart is not created.}
+
+\item{progress}{logical. If \code{TRUE} shows a progress bar.}
 }
 \value{
 \linkS4class{SDMtune} object.
@@ -35,49 +47,67 @@ Given a set of possible hyperparameter values, the function trains models
 with all the possible combinations of hyperparameters.
 }
 \details{
-\itemize{
-\item To know which hyperparameters can be tuned you can use the output
+To know which hyperparameters can be tuned you can use the output
 of the function \link{getTunableArgs}. Hyperparameters not included in the
 \code{hypers} argument take the value that they have in the passed model.
-}
+
+An interactive chart showing in real-time the steps performed by the
+algorithm is displayed in the Viewer pane.
 }
 \examples{
 \donttest{
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+                    pattern = "grd",
+                    full.names = TRUE)
+
+predictors <- terra::rast(files)
 
 # Prepare presence and background locations
 p_coords <- virtualSp$presence
 bg_coords <- virtualSp$background
 
 # Create SWD object
-data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-                   env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species",
+                   p = p_coords,
+                   a = bg_coords,
+                   env = predictors,
+                   categorical = "biome")
 
 # Split presence locations in training (80\%) and testing (20\%) datasets
-datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+datasets <- trainValTest(data,
+                         test = 0.2,
+                         only_presence = TRUE)
 train <- datasets[[1]]
 test <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxnet", data = train, fc = "l")
+model <- train(method = "Maxnet",
+               data = train,
+               fc = "l")
 
 # Define the hyperparameters to test
-h <- list(reg = 1:2, fc = c("lqp", "lqph"))
+h <- list(reg = 1:2,
+          fc = c("lqp", "lqph"))
 
 # Run the function using the AUC as metric
-output <- gridSearch(model, hypers = h, metric = "auc", test = test)
+output <- gridSearch(model,
+                     hypers = h,
+                     metric = "auc",
+                     test = test)
 output@results
 output@models
+
 # Order rusults by highest test AUC
 head(output@results[order(-output@results$test_AUC), ])
 
 # Run the function using the AICc as metric and without saving the trained
 # models, helpful when numerous hyperparameters are tested to avoid memory
 # problems
-output <- gridSearch(model, hypers = h, metric = "aicc", env = predictors,
+output <- gridSearch(model,
+                     hypers = h,
+                     metric = "aicc",
+                     env = predictors,
                      save_models = FALSE)
 output@results
 }

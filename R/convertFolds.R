@@ -1,4 +1,5 @@
-.convert_folds <- function(x, data) {
+.convert_folds <- function(x,
+                           data) {
   n <- length(data@pa)
 
   if ("train" %in% names(x) & "test" %in% names(x)) {
@@ -29,10 +30,10 @@
       test[unlist(x$folds[[i]][2]), i] <- TRUE
     }
   } else {
-    stop("Folds object format not allowed!")
+    cli::cli_abort("Folds object format not allowed.")
   }
 
-  output <- list(train = train, test = test)
+  list(train = train,
+       test = test)
 
-  return(output)
 }

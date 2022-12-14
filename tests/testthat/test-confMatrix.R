@@ -33,7 +33,7 @@ test_that("The thresholds start with 0 and end with 1 when th is not passed", {
   expect_equal(cm$th[nrow(cm)], 1)
 })
 
-test_that("Exception is raised", {
-  expect_error(confMatrix(SDMtune:::bm_maxent_cv, type = "cloglog"),
-               "Function available only for SDMmodel objects.")
+test_that("Exception are raised", {
+  expect_snapshot_error(confMatrix(SDMtune:::bm_maxent_cv, type = "cloglog"))
+  expect_snapshot_error(confMatrix(m, test = "a", type = "cloglog"))
 })

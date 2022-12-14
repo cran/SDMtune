@@ -8,9 +8,9 @@ setGeneric("predict", function(object, ...)
 #'
 #' @param object \linkS4class{Maxent} object.
 #' @param data data.frame with the data for the prediction.
-#' @param type character MaxEnt output type, possible values are "cloglog",
-#' "logistic" and "raw", default is "cloglog".
-#' @param clamp logical for clumping during prediction, default is `TRUE`.
+#' @param type character. MaxEnt output type, possible values are "cloglog",
+#' "logistic" and "raw".
+#' @param clamp logical for clumping during prediction.
 #'
 #' @details Used by the \link{predict,SDMmodel-method}, not exported.
 #'
@@ -27,12 +27,13 @@ setGeneric("predict", function(object, ...)
 #'
 #' @references Wilson P.D., (2009). Guidelines for computing MaxEnt model output
 #' values from a lambdas file.
-setMethod("predict",
-          signature = "Maxent",
-          definition = function(object,
-                                data,
-                                type = c("cloglog", "logistic", "raw"),
-                                clamp = TRUE) {
+setMethod(
+  f = "predict",
+  signature = "Maxent",
+  definition = function(object,
+                        data,
+                        type = c("cloglog", "logistic", "raw"),
+                        clamp = TRUE) {
 
     type <- match.arg(type)
 
@@ -48,6 +49,7 @@ setMethod("predict",
     f <- object@formula
     # Make the design matrix
     dm <- stats::model.matrix(f, data)
+
     # Scale features and clamp if clamp is TRUE
     cols <- !grepl("categorical.*|hinge.*|threshold.*", colnames(dm))
     dm[, cols] <- scaleClamp(dm[, cols, drop = FALSE], object@coeff$min[cols],
@@ -61,8 +63,9 @@ setMethod("predict",
     if (type == "raw") {
       return(raw)
     } else if (type == "logistic") {
-       return(raw * exp(object@entropy) / (1 + raw * exp(object@entropy)))
+      return(raw * exp(object@entropy) / (1 + raw * exp(object@entropy)))
     } else {
       return(1 - exp(-raw * exp(object@entropy)))
     }
-})
+  }
+)

@@ -5,6 +5,7 @@ test_that("Both presence and absence locations are merged", {
   np <- nrow(t@data[t@pa == 1, ])
   na <- nrow(t@data[t@pa == 0, ])
   n <- (np * 2) + (na * 2)
+
   expect_s4_class(x, "SWD")
   expect_equal(rownames(x@data), as.character(1:n))
   expect_equal(rownames(x@coords), as.character(1:n))
@@ -19,6 +20,7 @@ test_that("Only presence locations are merged if only_presence is TRUE", {
   np <- nrow(t@data[t@pa == 1, ])
   na <- nrow(t@data[t@pa == 0, ])
   n <- (np * 2) + na
+
   expect_s4_class(x, "SWD")
   expect_equal(rownames(x@data), as.character(1:n))
   expect_equal(rownames(x@coords), as.character(1:n))
@@ -29,16 +31,19 @@ test_that("Only presence locations are merged if only_presence is TRUE", {
 })
 
 test_that("The function raises errors", {
-  expect_error(mergeSWD(t, t@data), "The function accepts only SWD objects!")
+  expect_snapshot_error(mergeSWD(t, t@data))
+
   x <- t
   x@species <- "Gypaetus barbatus"
-  expect_error(mergeSWD(x, t), "SWD1 and SWS2 have a different species!")
+
+  expect_snapshot_error(mergeSWD(x, t))
 })
 
 test_that("The function warns if datasets have different variables", {
   x <- t
   x@data$biome <- NULL
-  expect_warning(mergeSWD(x, t))
+
+  expect_snapshot_warning(m <- mergeSWD(x, t))
   # Check that common columns are merged
-  expect_named(suppressWarnings(mergeSWD(x, t)@data), names(x@data))
+  expect_named(m@data, names(x@data))
 })

@@ -10,7 +10,7 @@ plotVarImp(df, color = "grey")
 \item{df}{data.frame. A data.frame containing the the name of the variables
 as first column and the value of the variable importance as second column.}
 
-\item{color}{character. The color of the bar plot, default is grey.}
+\item{color}{character. The colour of the bar plot.}
 }
 \value{
 A \link[ggplot2]{ggplot} object.
@@ -21,28 +21,37 @@ Plot the variable importance as a bar plot.
 \examples{
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+                    pattern = "grd",
+                    full.names = TRUE)
+
+predictors <- terra::rast(files)
 
 # Prepare presence and background locations
 p_coords <- virtualSp$presence
 bg_coords <- virtualSp$background
 
 # Create SWD object
-data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-                   env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species",
+                   p = p_coords,
+                   a = bg_coords,
+                   env = predictors,
+                   categorical = "biome")
 
 # Train a model
-model <- train(method = "Maxnet", data = data, fc = "l")
+model <- train(method = "Maxnet",
+               data = data,
+               fc = "l")
 
 # Compute variable importance
-vi <- varImp(model, permut = 1)
+vi <- varImp(model,
+             permut = 1)
 
 # Plot variable importance
 plotVarImp(vi)
 
 # Plot variable importance with custom color
-plotVarImp(vi, color = "red")
+plotVarImp(vi,
+           color = "red")
 }
 \author{
 Sergio Vignali

@@ -6,10 +6,9 @@
 #' threshold.
 #'
 #' @param bg \linkS4class{SWD} object used to compute the correlation matrix.
-#' @param method character. The method used to compute the correlation matrix,
-#' default is "spearman".
+#' @param method character. The method used to compute the correlation matrix.
 #' @param cor_th numeric. If provided it prints only the coefficients that are
-#' higher or lower than the given threshold, default is `NULL`.
+#' higher or lower than the given threshold.
 #'
 #' @return A \link[ggplot2]{ggplot} object.
 #' @export
@@ -22,23 +21,37 @@
 #' \donttest{
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare background locations
-#' bg_coords <- dismo::randomPoints(predictors, 10000)
+#' bg_coords <- terra::spatSample(predictors,
+#'                                size = 9000,
+#'                                method = "random",
+#'                                na.rm = TRUE,
+#'                                xy = TRUE,
+#'                                values = FALSE)
 #'
 #' # Create SWD object
-#' bg <- prepareSWD(species = "Virtual species", a = bg_coords,
-#'                  env = predictors, categorical = "biome")
+#' bg <- prepareSWD(species = "Virtual species",
+#'                  a = bg_coords,
+#'                  env = predictors,
+#'                  categorical = "biome")
 #'
 #' # Plot heat map
-#' plotCor(bg, method = "spearman")
+#' plotCor(bg,
+#'         method = "spearman")
 #'
 #' # Plot heat map showing only values higher than given threshold
-#' plotCor(bg, method = "spearman", cor_th = 0.8)
+#' plotCor(bg,
+#'         method = "spearman",
+#'         cor_th = 0.8)
 #' }
-plotCor <- function(bg, method = "spearman", cor_th = NULL) {
+plotCor <- function(bg,
+                    method = "spearman",
+                    cor_th = NULL) {
 
   cor_matrix <- corVar(bg, method = method, order = FALSE,
                        remove_diagonal = FALSE)
@@ -75,5 +88,5 @@ plotCor <- function(bg, method = "spearman", cor_th = NULL) {
                          color = "black", size = 3)
   }
 
-  return(heat_map)
+  heat_map
 }

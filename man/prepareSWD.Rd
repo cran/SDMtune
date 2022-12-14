@@ -4,20 +4,29 @@
 \alias{prepareSWD}
 \title{Prepare an SWD object}
 \usage{
-prepareSWD(species, env, p = NULL, a = NULL, categorical = NULL)
+prepareSWD(
+  species,
+  env,
+  p = NULL,
+  a = NULL,
+  categorical = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{species}{character. The name of the species.}
 
-\item{env}{\link[raster]{stack} containing the environmental variables used
-to extract the values at coordinate locations.}
+\item{env}{\link[terra]{rast} containing the environmental variables used to
+extract the values at coordinate locations.}
 
 \item{p}{data.frame. The coordinates of the presence locations.}
 
 \item{a}{data.frame. The coordinates of the absence/background locations.}
 
 \item{categorical}{vector indicating which of the environmental variable are
-categorical, default is \code{NULL}.}
+categorical.}
+
+\item{verbose}{logical, if \code{TRUE} prints informative messages.}
 }
 \value{
 An \linkS4class{SWD} object.
@@ -33,16 +42,21 @@ locations are always before than the absence/background locations.
 \examples{
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+                    pattern = "grd",
+                    full.names = TRUE)
+
+predictors <- terra::rast(files)
 
 # Prepare presence and background locations
 p_coords <- virtualSp$presence
 bg_coords <- virtualSp$background
 
 # Create the SWD object
-data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-                   env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species",
+                   p = p_coords,
+                   a = bg_coords,
+                   env = predictors,
+                   categorical = "biome")
 data
 }
 \author{

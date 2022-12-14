@@ -4,9 +4,9 @@
 #'
 #' @param swd1 \linkS4class{SWD} object.
 #' @param swd2 \linkS4class{SWD} object.
-#' @param only_presence logical, if `TRUE` only for the presence locations are
+#' @param only_presence logical If `TRUE` only for the presence locations are
 #' merged and the absence/background locations are taken only from the `swd1`
-#' object, default is `FALSE`.
+#' object.
 #'
 #' @details
 #' * In case the two \linkS4class{SWD} objects have different columns, only the
@@ -22,46 +22,59 @@
 #' @examples
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare presence and background locations
 #' p_coords <- virtualSp$presence
 #' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-#'                    env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species",
+#'                    p = p_coords,
+#'                    a = bg_coords,
+#'                    env = predictors,
+#'                    categorical = "biome")
 #'
 #' # Split only presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+#' datasets <- trainValTest(data,
+#'                          test = 0.2,
+#'                          only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Merge the training and the testing datasets together
-#' merged <- mergeSWD(train, test, only_presence = TRUE)
+#' merged <- mergeSWD(train,
+#'                    test,
+#'                    only_presence = TRUE)
 #'
 #' # Split presence and absence locations in training (80%) and testing (20%)
 #' datasets
-#' datasets <- trainValTest(data, test = 0.2)
+#' datasets <- trainValTest(data,
+#'                          test = 0.2)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Merge the training and the testing datasets together
 #' merged <- mergeSWD(train, test)
-mergeSWD <- function(swd1, swd2, only_presence = FALSE) {
+mergeSWD <- function(swd1,
+                     swd2,
+                     only_presence = FALSE) {
 
   if (!inherits(swd1, "SWD") | !inherits(swd2, "SWD"))
-    stop("The function accepts only SWD objects!")
+    cli::cli_abort("The function accepts only {.cls SWD} objects.")
 
   if (swd1@species != swd2@species)
-    stop("SWD1 and SWS2 have a different species!")
+    cli::cli_abort("{.var swd1} and {.var swd2} have a different species!")
 
   if (length(colnames(swd1@data)) != length(colnames(swd2@data)) ||
       length(intersect(colnames(swd1@data), colnames(swd2@data))) !=
       length(colnames(swd1@data))) {
-    warning(paste("The two SWD objects have different columns,",
-                  "only the common columns are used in the merged object!"))
+    cli::cli_warn(
+      paste("The two SWD objects have different columns,",
+            "only the common columns are used in the merged object"))
     # Get common variables
     vars <- intersect(colnames(swd1@data), colnames(swd2@data))
     # Subset objects
@@ -103,5 +116,5 @@ mergeSWD <- function(swd1, swd2, only_presence = FALSE) {
                 swd1@pa[swd1@pa == 0], swd2@pa[swd2@pa == 0])
   }
 
-  return(swd)
+  swd
 }

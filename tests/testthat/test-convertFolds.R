@@ -9,10 +9,13 @@ test_that("ENMeval presence only", {
 
   # ENMeval older version
   folds <- .convert_folds(x, data)
+
   expect_length(folds, 2)
   expect_named(folds, c("train", "test"))
-  expect_equal(ncol(folds$train), ncol(folds$test), 4)
+  expect_equal(ncol(folds$train), 4)
+  expect_equal(ncol(folds$test), 4)
   expect_equal(nrow(folds$train), nrow(folds$test))
+
   for (i in 1:3) {
     expect_equal(folds$train[, i][1:np], !folds$test[, i][1:np])
     expect_equal(folds$train[, i][(np + 1):n], folds$test[, i][(np + 1):n])
@@ -21,10 +24,13 @@ test_that("ENMeval presence only", {
   # ENMeval 2.x
   names(x) <- c("occs.grp", "bg.grp" )
   folds <- .convert_folds(x, data)
+
   expect_length(folds, 2)
   expect_named(folds, c("train", "test"))
-  expect_equal(ncol(folds$train), ncol(folds$test), 4)
+  expect_equal(ncol(folds$train), 4)
+  expect_equal(ncol(folds$test), 4)
   expect_equal(nrow(folds$train), nrow(folds$test))
+
   for (i in 1:3) {
     expect_equal(folds$train[, i][1:np], !folds$test[, i][1:np])
     expect_equal(folds$train[, i][(np + 1):n], folds$test[, i][(np + 1):n])
@@ -39,10 +45,13 @@ test_that("ENMeval presence and background", {
 
   # ENMeval older version
   folds <- .convert_folds(x, data)
+
   expect_length(folds, 2)
   expect_named(folds, c("train", "test"))
-  expect_equal(ncol(folds$train), ncol(folds$test), 4)
+  expect_equal(ncol(folds$train), 4)
+  expect_equal(ncol(folds$test), 4)
   expect_equal(nrow(folds$train), nrow(folds$test))
+
   for (i in 1:3) {
     expect_equal(folds$train[, i], !folds$test[, i])
   }
@@ -50,10 +59,13 @@ test_that("ENMeval presence and background", {
   # ENMeval 2.x
   names(x) <- c("occs.grp", "bg.grp")
   folds <- .convert_folds(x, data)
+
   expect_length(folds, 2)
   expect_named(folds, c("train", "test"))
-  expect_equal(ncol(folds$train), ncol(folds$test), 4)
+  expect_equal(ncol(folds$train), 4)
+  expect_equal(ncol(folds$test), 4)
   expect_equal(nrow(folds$train), nrow(folds$test))
+
   for (i in 1:3) {
     expect_equal(folds$train[, i], !folds$test[, i])
   }
@@ -72,10 +84,13 @@ test_that("blockCV", {
   x <- list(folds = f, k = 2)
   class(x) <- "EnvironmentalBlock"
   folds <- .convert_folds(x, data)
+
   expect_length(folds, 2)
   expect_named(folds, c("train", "test"))
-  expect_equal(ncol(folds$train), ncol(folds$test), 4)
+  expect_equal(ncol(folds$train), 2)
+  expect_equal(ncol(folds$test), 2)
   expect_equal(nrow(folds$train), nrow(folds$test))
+
   for (i in 1:2) {
     expect_equal(folds$train[, i], !folds$test[, i])
     expect_equal(sort(unlist(f[[i]][1])), which(folds$train[, i]))
@@ -89,5 +104,5 @@ test_that("randomFolds", {
 })
 
 test_that("error is raised", {
-  expect_error(.convert_folds(t, t), "Folds object format not allowed!")
+  expect_snapshot_error(.convert_folds(t, t))
 })

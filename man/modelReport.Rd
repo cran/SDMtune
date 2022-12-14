@@ -15,7 +15,8 @@ modelReport(
   env = NULL,
   clamp = TRUE,
   permut = 10,
-  factors = NULL
+  factors = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -24,31 +25,31 @@ modelReport(
 \item{folder}{character. The name of the folder in which to save the output.
 The folder is created in the working directory.}
 
-\item{test}{\linkS4class{SWD} object with the test locations, default is
-\code{NULL}.}
+\item{test}{\linkS4class{SWD} object with the test locations.}
 
 \item{type}{character. The output type used for "Maxent" and "Maxnet"
-methods, possible values are "cloglog" and "logistic", default is
-\code{NULL}.}
+methods, possible values are "cloglog" and "logistic".}
 
 \item{response_curves}{logical, if \code{TRUE} it plots the response curves in the
-html output, default is \code{FALSE}.}
+html output.}
 
 \item{only_presence}{logical, if \code{TRUE} it uses only the range of the
-presence location for the marginal response, default is \code{FALSE}.}
+presence location for the marginal response.}
 
-\item{jk}{logical, if \code{TRUE} it runs the jackknife test, default is \code{FALSE}.}
+\item{jk}{logical, if \code{TRUE} it runs the jackknife test.}
 
-\item{env}{\link[raster]{stack}. If provided it computes and adds a
-prediction map to the output, default is \code{NULL}.}
+\item{env}{\link[terra]{rast}. If provided it computes and adds a prediction
+map to the output.}
 
 \item{clamp}{logical for clumping during prediction, used for response curves
-and for the prediction map, default is \code{TRUE}.}
+and for the prediction map.}
 
-\item{permut}{integer. Number of permutations, default is 10.}
+\item{permut}{integer. Number of permutations.}
 
-\item{factors}{list with levels for factor variables,
-see \link[raster]{predict}}
+\item{factors}{deprecated, package \pkg{terra} handles factors in a different
+way than \pkg{raster}, see \pkg{terra} documentation.}
+
+\item{verbose}{logical, if \code{TRUE} prints informative messages.}
 }
 \description{
 Make a report that shows the main results.
@@ -63,30 +64,45 @@ software.
 # to set the argument ask like following: example("modelReport", ask = FALSE)
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+                    pattern = "grd",
+                    full.names = TRUE)
+
+predictors <- terra::rast(files)
 
 # Prepare presence and background locations
 p_coords <- virtualSp$presence
 bg_coords <- virtualSp$background
 
 # Create SWD object
-data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-                   env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species",
+                   p = p_coords,
+                   a = bg_coords,
+                   env = predictors,
+                   categorical = "biome")
 
 # Split presence locations in training (80\%) and testing (20\%) datasets
-datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+datasets <- trainValTest(data,
+                         test = 0.2,
+                         only_presence = TRUE)
 train <- datasets[[1]]
 test <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxnet", data = train, fc = "lq")
+model <- train(method = "Maxnet",
+               data = train,
+               fc = "lq")
 
 # Create the report
 \dontrun{
-modelReport(model, type = "cloglog", folder = "my_folder", test = test,
-            response_curves = TRUE, only_presence = TRUE, jk = TRUE,
-            env = predictors, permut = 2)
+modelReport(model,
+            type = "cloglog",
+            folder = "my_folder",
+            test = test,
+            response_curves = TRUE,
+            only_presence = TRUE,
+            jk = TRUE,
+            env = predictors,
+            permut = 2)
 }
 }
 }

@@ -3,7 +3,7 @@
 #' Plot the ROC curve of the given model and print the AUC value.
 #'
 #' @param model \linkS4class{SDMmodel} object.
-#' @param test \linkS4class{SWD} object. The testing dataset, default is `NULL`.
+#' @param test \linkS4class{SWD} object. The testing dataset.
 #'
 #' @return A \link[ggplot2]{ggplot} object.
 #' @export
@@ -13,38 +13,50 @@
 #' @examples
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare presence and background locations
 #' p_coords <- virtualSp$presence
 #' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-#'                    env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species",
+#'                    p = p_coords,
+#'                    a = bg_coords,
+#'                    env = predictors,
+#'                    categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+#' datasets <- trainValTest(data,
+#'                          test = 0.2,
+#'                          only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", data = train, fc = "l")
+#' model <- train(method = "Maxnet",
+#'                data = train,
+#'                fc = "l")
 #'
 #' # Plot the training ROC curve
 #' plotROC(model)
 #'
 #' # Plot the training and testing  ROC curves
-#' plotROC(model, test = test)
+#' plotROC(model,
+#'         test = test)
 #'
 #' @author Sergio Vignali
-plotROC <- function(model, test = NULL) {
+plotROC <- function(model,
+                    test = NULL) {
 
   if (!requireNamespace("plotROC", quietly = TRUE)) {
-    stop("You need the packege \"plotROC\" to run this function,",
-         " please install it.",
-         call. = FALSE)
+    cli::cli_abort(
+      "Please install package {.pkg plotROC} to use this function",
+      call = NULL
+    )
   }
 
   if (inherits(model@model, "Maxent")) {
@@ -83,5 +95,5 @@ plotROC <- function(model, test = NULL) {
       ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
   }
 
-  return(my_plot)
+  my_plot
 }

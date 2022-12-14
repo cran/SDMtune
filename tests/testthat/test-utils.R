@@ -23,8 +23,8 @@ test_that(".subset_swd", {
 })
 
 test_that(".get_model_class", {
-  expect_equivalent(.get_model_class(model), "Maxnet")
-  expect_equivalent(.get_model_class(model_cv), "Maxnet")
+  expect_equal(.get_model_class(model), "Maxnet", ignore_attr = TRUE)
+  expect_equal(.get_model_class(model_cv), "Maxnet", ignore_attr = TRUE)
 })
 
 test_that(".get_model_reg", {
@@ -178,44 +178,27 @@ test_that("The function .start_server creates the url", {
 })
 
 test_that("The function .check_args function raises exceptions", {
-  h <- list("fc" = c("l", "lq", "lqp"), "reg" = seq(.2, 2., .2), "a" = 10000)
-  # Throws exception if metric is aicc and env is not provided
-  expect_error(.check_args(model, metric = "aicc", hypers = h),
-               "You must provide the 'env' argument if you want to use the AICc metric!")
-  # Throws exception if metric is aicc and model is SDMmodelCV
-  expect_error(.check_args(model_cv, metric = "aicc", hypers = h),
-               "Metric 'aicc' not allowed with SDMmodelCV objects!")
-  # Throws exception if model is SDMmodel metric is not aicc and test is not provided
-  expect_error(.check_args(model, metric = "auc", hypers = h),
-               "You need to provide a test dataset!")
-  # Throws exception if provided hypers are not tunable
-  h <- list("fc" = c("l", "lq", "lqp"), "lambda" = c(500, 600))
-  expect_error(.check_args(model, "auc", data, hypers = h),
-               "lambda non included in tunable hyperparameters")
-  h <- list("beta" = c(1, 2, 3), "lambda" = c(500, 600))
-  expect_error(.check_args(model, "auc", data, hypers = h),
-               paste("beta non included in tunable hyperparameters,",
-                     "lambda non included in tunable hyperparameters"))
-})
+  h <- list("fc" = c("l", "lq", "lqp"),
+            "reg" = seq(.2, 2., .2),
+            "a" = 10000)
 
-test_that("The function .check_optimize_hypers raises exceptions", {
-  # Throws exception if less than two hypers have more than two values
-  h <- list("fc" = c("l", "lq"), "reg" = c(.2, .4), "a" = 10000)
-  grid <- .get_hypers_grid(model, h)
-  expect_error(.check_optimize_args(h, grid, pop = 5),
-               "One hyperparameter in hypers should have more than two values to allow crossover!")
-  # Throws exception if there are less than two hypers to be tuned
-  h <- list("fc" = c("l", "lq", "lqp"))
-  expect_error(.check_optimize_args(h, pop = 5),
-               "You must provide at least two hyperparameters to be tuned! Use gridSearch to tune only one parameter.")
-  # Throws exception if possible random combinations < pop
-  h <- list("fc" = c("l", "lq", "lqp"), "reg" = c(.2, .4), "a" = 10000)
-  grid <- .get_hypers_grid(model, h)
-  expect_error(.check_optimize_args(h, grid, pop = 7),
-               "Number of possible random models is lewer than population size, add more values to the 'hyper' argument!")
-  # Throws exception if possible random combinations < pop
-  expect_error(.check_optimize_args(h, grid, pop = 6),
-               "Number of possible random models is the same than population size. Use gridSearch function!")
+  # Throws exception if metric is aicc and env is not provided
+  expect_snapshot_error(.check_args(model, metric = "aicc", hypers = h))
+
+  # Throws exception if metric is aicc and model is SDMmodelCV
+  expect_snapshot_error(.check_args(model_cv, metric = "aicc", hypers = h))
+
+  # Throws exception if model is SDMmodel metric is not aicc and test
+  # is not provided
+  expect_snapshot_error(.check_args(model, metric = "auc", hypers = h))
+
+  # Throws exception if provided hypers are not tunable
+  h <- list("fc" = c("l", "lq", "lqp"),
+            "lambda" = c(500, 600))
+  expect_snapshot_error(.check_args(model, "auc", data, hypers = h))
+  h <- list("beta" = c(1, 2, 3),
+            "lambda" = c(500, 600))
+  expect_snapshot_error(.check_args(model, "auc", data, hypers = h))
 })
 
 test_that("The function .args_name", {
@@ -224,4 +207,9 @@ test_that("The function .args_name", {
   expect_vector(.args_name("trainMaxent"), ptype = character(), size = 4)
   expect_vector(.args_name("trainMaxnet"), ptype = character(), size = 3)
   expect_vector(.args_name("trainRF"), ptype = character(), size = 4)
+})
+
+# TODO: Remove with version 2.0.0
+test_that("Warns if raster package is used", {
+  expect_snapshot_warning(.warn_raster("raster", "rast"))
 })

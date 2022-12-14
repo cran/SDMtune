@@ -1,4 +1,7 @@
-.create_chart <- function(folder, script, settings, data) {
+.create_chart <- function(folder,
+                          script,
+                          settings,
+                          data) {
 
   dir.create(folder)
 
@@ -17,7 +20,8 @@
   .render_script(folder, script, settings, data)
 }
 
-.show_chart <- function(folder, height = 300) {
+.show_chart <- function(folder,
+                        height = 300) {
 
   # Show chart if not called from testthat
   if (!Sys.getenv("TESTTHAT") == "true") {
@@ -32,7 +36,10 @@
   }
 }
 
-.render_script <- function(folder, script, settings, data) {
+.render_script <- function(folder,
+                           script,
+                           settings,
+                           data) {
 
   template <- paste(readLines(file.path(system.file("scripts",
                                                     package = "SDMtune"),
@@ -47,7 +54,8 @@
   writeLines(rendered_script, file.path(folder, "lib", "chart_script.js"))
 }
 
-.update_data <- function(folder, data) {
+.update_data <- function(folder,
+                         data) {
   jsonlite::write_json(data, file.path(folder, "data.json"))
   Sys.sleep(.1)
 }
@@ -61,10 +69,14 @@
                   "/chart_template.html")
     utils::browseURL(url)
   }
-  return(invisible(url))
+
+  invisible(url)
 }
 
-.create_plot <- function(x, title, interactive, folder = NULL) {
+.create_plot <- function(x,
+                         title,
+                         interactive,
+                         folder = NULL) {
   res <- x@results
   n <- nrow(res)
 
@@ -100,6 +112,7 @@
                          function(x) paste0(names(x), ": ", x,
                                             collapse = "\n"))
     train_metric <- data.frame(x = x_labs, y = res[, hyper_cols + 1])
+
     if (metric != "AICc") {
       val_metric <- data.frame(x = x_labs, y = res[, hyper_cols + 2])
     } else {
@@ -139,6 +152,6 @@
     if (show_line)
       p <- p + ggplot2::geom_line(linetype = "dashed", size = .3)
 
-    return(p)
+    p
   }
 }

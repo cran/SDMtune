@@ -19,23 +19,26 @@ test_that("The plot has the correct labels and elements", {
   expect_equal(unique(p$data$test), c("With only", "Without"))
   p <- plotJk(jk_auc, type = "test")
   expect_equal(p$labels$y, "Test AUC")
+
   # Only without
   p <- plotJk(jk_auc[, c(1, 2, 4)])
   expect_equal(unique(p$data$test), "Without")
+
   # TSS
   p <- plotJk(jk_tss)
   expect_equal(p$labels$y, "Train TSS")
   p <- plotJk(jk_tss, type = "test")
   expect_equal(p$labels$y, "Test TSS")
+
   # AICc
   p <- plotJk(jk_aicc)
   expect_equal(p$labels$y, "AICc")
-  expect_error(plotJk(jk_aicc, type = "test"),
-               "Test mode is not available with aicc!")
+  expect_snapshot_error(plotJk(jk_aicc, type = "test"))
 })
 
 test_that("The function works also when the argument is a list", {
   jk <- list(results = jk_auc, models = list())
   p <- plotJk(jk)
+
   expect_equal(p$labels$y, "Train AUC")
 })

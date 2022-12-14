@@ -11,7 +11,8 @@ doJk(
   test = NULL,
   with_only = TRUE,
   env = NULL,
-  return_models = FALSE
+  return_models = FALSE,
+  progress = TRUE
 )
 }
 \arguments{
@@ -21,19 +22,21 @@ doJk(
 values are: "auc", "tss" and "aicc".}
 
 \item{variables}{vector. Variables used for the test, if not provided it
-takes all the variables used to train the model, default is \code{NULL}.}
+takes all the variables used to train the model.}
 
 \item{test}{\linkS4class{SWD}. If provided it reports the result also for the
 testing dataset. Not used for \strong{aicc} and \linkS4class{SDMmodelCV}.}
 
-\item{with_only}{logical. If \code{TRUE} it runs the test also for each
-variable in isolation, default is \code{TRUE}.}
+\item{with_only}{logical. If \code{TRUE} it runs the test also for each variable
+in isolation.}
 
-\item{env}{\link[raster]{stack} containing the environmental variables, used
-only with "aicc", default is \code{NULL}.}
+\item{env}{\link[terra]{rast} containing the environmental variables, used
+only with "aicc".}
 
-\item{return_models}{logical, if \code{TRUE} returns all the models together with
-the test result, default is \code{FALSE}.}
+\item{return_models}{logical. If \code{TRUE} returns all the models together with
+the test result.}
+
+\item{progress}{logical If \code{TRUE} shows a progress bar.}
 }
 \value{
 A data frame with the test results. If \code{return_model = TRUE} it
@@ -46,44 +49,71 @@ Run the Jackknife test for variable importance removing one variable at time.
 \donttest{
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+                    pattern = "grd",
+                    full.names = TRUE)
+
+predictors <- terra::rast(files)
 
 # Prepare presence and background locations
 p_coords <- virtualSp$presence
 bg_coords <- virtualSp$background
 
 # Create SWD object
-data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-                   env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species",
+                   p = p_coords,
+                   a = bg_coords,
+                   env = predictors,
+                   categorical = "biome")
 
 # Split presence locations in training (80\%) and testing (20\%) datasets
-datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+datasets <- trainValTest(data,
+                         test = 0.2,
+                         only_presence = TRUE)
 train <- datasets[[1]]
 test <- datasets[[2]]
 
 # Train a model
-model <- train(method = "Maxnet", data = train, fc = "lq")
+model <- train(method = "Maxnet",
+               data = train,
+               fc = "lq")
 
 # Execute the Jackknife test only for the environmental variables "bio1" and
 # "bio12", using the metric AUC
-doJk(model, metric = "auc", variables = c("bio1", "bio12"), test = test)
+doJk(model,
+     metric = "auc",
+    variables = c("bio1", "bio12"),
+    test = test)
+
+# The same without testing dataset
+doJk(model,
+     metric = "auc",
+     variables = c("bio1", "bio12"))
 
 # Execute the Jackknife test only for the environmental variables "bio1" and
 # "bio12", using the metric TSS but without running the test for one single
 # variable
-doJk(model, metric = "tss", variables = c("bio1", "bio12"), test = test,
+doJk(model,
+     metric = "tss",
+     variables = c("bio1", "bio12"),
+     test = test,
      with_only = FALSE)
 
 # Execute the Jackknife test only for the environmental variables "bio1" and
 # "bio12", using the metric AICc but without running the test for one single
 # variable
-doJk(model, metric = "aicc", variables = c("bio1", "bio12"),
-     with_only = FALSE, env = predictors)
+doJk(model,
+     metric = "aicc",
+     variables = c("bio1", "bio12"),
+     with_only = FALSE,
+     env = predictors)
 
 # Execute the Jackknife test for all the environmental variables using the
 # metric AUC and returning all the trained models
-jk <- doJk(model, metric = "auc", test = test, return_models = TRUE)
+jk <- doJk(model,
+           metric = "auc",
+           test = test,
+           return_models = TRUE)
+
 jk$results
 jk$models_without
 jk$models_withonly

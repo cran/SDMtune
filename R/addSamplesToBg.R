@@ -4,9 +4,9 @@
 #' to the Maxent argument `addsamplestobackground=true`.
 #'
 #' @param x \linkS4class{SWD} object.
-#' @param all logical, if `TRUE` it adds all the presence locations even if
-#' already included in the background locations, default is `FALSE`. This
-#' is equivalent to the Maxent argument `addallsamplestobackground=true`.
+#' @param all logical. If `TRUE` it adds all the presence locations even if
+#' already included in the background locations. This is equivalent to the
+#' Maxent argument `addallsamplestobackground=true`.
 #'
 #' @return An object of class \linkS4class{SWD}.
 #' @export
@@ -16,30 +16,41 @@
 #' @examples
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare presence and background locations
 #' p_coords <- virtualSp$presence
 #' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-#'                    env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species",
+#'                    p = p_coords,
+#'                    a = bg_coords,
+#'                    env = predictors,
+#'                    categorical = "biome")
+#' data
 #'
-#' # Add presence locations with values not included in the background to the
+#' # Add presence locations with values not included in the backgrounds to the
 #' # background locations
 #' new_data <- addSamplesToBg(data)
 #' new_data
 #'
 #' # Add all the presence locations to the background locations, even if they
-#' # have values already included in the background
-#' new_data <- addSamplesToBg(data, all = TRUE)
+#' # have values already included in the backgrounds
+#' new_data <- addSamplesToBg(data,
+#'                            all = TRUE)
 #' new_data
-addSamplesToBg <- function(x, all = FALSE) {
+addSamplesToBg <- function(x,
+                           all = FALSE) {
 
   if (!inherits(x, "SWD"))
-    stop("The function accepts only SWD objects.")
+    cli::cli_abort(c(
+      "!" = "{.var x} must be an {.cls SWD} object",
+      "x" = "You have supplied a {.cls {class(x)}} instead."
+    ))
 
   # Append presence locations after background locations
   o <- x
@@ -55,6 +66,7 @@ addSamplesToBg <- function(x, all = FALSE) {
     index <- which(index == TRUE)
     # Get index only for the appended presence locations
     index <- index[index > sum(x@pa == 0)]
+
     if (length(index) > 0) {
       # Remove duplicates
       o@data <- o@data[-index, ]
@@ -65,5 +77,5 @@ addSamplesToBg <- function(x, all = FALSE) {
     }
   }
 
-  return(o)
+  o
 }

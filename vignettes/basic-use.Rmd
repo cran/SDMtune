@@ -17,6 +17,8 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
                       fig.align = "center")
 ```
 
+<img src="../man/figures/logo.png" width="70" style = "float: right; border: none;">
+
 # Prepare data for the analysis
 
 In this section you will learn how to prepare the data to train models using `SDMtune`. We will use the `virtualSp` dataset included in the package and environmental predictors from the  [WorldClim](https://www.worldclim.org/) dataset.
@@ -34,12 +36,13 @@ We use the climate data of [WorldClim](https://www.worldclim.org/) version 1.4 [
 
 ```{r get predictors}
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-                    pattern = "grd", full.names = TRUE)
+                    pattern = "grd",
+                    full.names = TRUE)
 ```
 
-We convert these files in a `raster stack` object that will be used later in the analysis:
-```{r create raster stack}
-predictors <- raster::stack(files)
+We convert these files in a `raster` object that will be used later in the analysis:
+```{r create raster object}
+predictors <- terra::rast(files)
 ```
 
 There are nine environmental variables, eight continuous and one categorical:
@@ -128,8 +131,11 @@ ggplot(map_data("world"), aes(long, lat)) +
 Before training a model we have to prepare the data in the correct format. The `prepareSWD` function creates an `SWD` object that stores the species' name, the coordinates of the species at presence and absence/background locations and the value of the environmental variables at the locations. The argument `categorical` indicates which environmental variables are categorical. In our example **biome** is categorical (we can pass a vector if we have more than one categorical environmental variable). The function extracts the value of the environmental variables for each location and excludes those locations that have `NA` value for at least one environmental variable.
 
 ```{r prepare SWD}
-data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-                   env = predictors, categorical = "biome")
+data <- prepareSWD(species = "Virtual species", 
+                   p = p_coords, 
+                   a = bg_coords,
+                   env = predictors, 
+                   categorical = "biome")
 
 ```
 
@@ -174,12 +180,14 @@ We can save the `SWD` object in a **.csv** file using the function `swd2csv` (th
 
 * save the object in a single file with the column **pa** indicating if the location is a presence (1) or an absence/background (0) site
 ```{r save SWD single, eval=FALSE}
-swd2csv(data, file_name = "data.csv")
+swd2csv(data, 
+        file_name = "data.csv")
 ```
 
 * save the object in two separate files: one for the presence and the other for the absence/background locations
 ```{r save SWDdouble, eval=FALSE}
-swd2csv(data, file_name = c("presence.csv", "background.csv"))
+swd2csv(data, 
+        file_name = c("presence.csv", "background.csv"))
 ```
 
 # Train a model
@@ -203,7 +211,8 @@ We use the function `train` to train a **Maxent** model. We need to provide two 
 * `data`: the `SWD` object with the presence and background locations.
 
 ```{r train}
-model <- train(method = "Maxent", data = data)
+model <- train(method = "Maxent", 
+               data = data)
 ```
 
 The function trains the model using default settings that are:
@@ -258,13 +267,21 @@ The most important are: **fc**, **reg** and **iter** that contain the values of 
 The function `train()` accepts optional arguments that can be used to change the default model settings. In our previous example we could have trained the same model using:
 
 ```{r retrain}
-model <- train(method = "Maxent", data = data, fc = "lqph", reg = 1, iter = 500)
+model <- train(method = "Maxent", 
+               data = data, 
+               fc = "lqph", 
+               reg = 1, 
+               iter = 500)
 ```
 
 In the following example we train a model using linear and hinge as feature class combination, 0.5 as regularization multiplier and 700 iterations:
 
 ```{r model witout default arguments}
-model <- train(method = "Maxent", data = data, fc = "lh", reg = 0.5, iter = 700)
+model <- train(method = "Maxent", 
+               data = data, 
+               fc = "lh", 
+               reg = 0.5, 
+               iter = 700)
 ```
 
 By default Maxent models are trained using the arguments *"removeduplicates=false"* and *"addsamplestobackground=false"*. The user should have the full control of the data used to train the model, so is expected that duplicated locations are already removed and that the presence locations are already included in the background locations, when desired. You can use the function `thinData` to remove duplicated locations and the function `addSamplesToBg` to add the presence locations to the background locations.
@@ -274,13 +291,15 @@ By default Maxent models are trained using the arguments *"removeduplicates=fals
 New locations are predicted with the function `predict`. The function takes three main arguments:
 
 * a trained model given as `SDMmodel` object;
-* a new dataset, used to make prediction (can be a `data.frame`, an `SWD` object or a raster `stack` object);
+* a new dataset, used to make prediction (can be a `data.frame`, an `SWD` object or a raster object);
 * the output type, that for **Maxent** models can be: **raw**, **logistic** or **cloglog**.
 
 Next we get the prediction for our training locations using the **cloglog** output type:
 
 ```{r predict train}
-pred <- predict(model, data = data, type = "cloglog")
+pred <- predict(model, 
+                data = data, 
+                type = "cloglog")
 ```
 
 The output in this case is a vector containing all the predicted values for the training locations:
@@ -292,7 +311,9 @@ head(pred)
 We can get the prediction only for the presence location with:
 ```{r predict presence}
 p <- data@data[data@pa == 1, ]
-pred <- predict(model, data = p, type = "cloglog")
+pred <- predict(model, 
+                data = p, 
+                type = "cloglog")
 tail(pred)
 ```
 
@@ -300,13 +321,15 @@ For models trained with the **Maxent**  method, the function performs the predic
 
 ## Create a distribution map
 
-We can use the same function to create a distribution map starting from the `predictors` raster `stack' object:
+We can use the same function to create a distribution map starting from the `predictors` raster object:
 
 ```{r predict raster}
-map <- predict(model, data = predictors, type = "cloglog")
+map <- predict(model, 
+               data = predictors, 
+               type = "cloglog")
 ```
 
-In this case the output is a `raster` object:
+In this case the output is a raster object:
 
 ```{r print raster output}
 map
@@ -315,7 +338,10 @@ map
 The map can be saved in a file directly when running the prediction, we just have to pass additional arguments to the `predict` function. In the next example we save the map in a file called "**my_file**" in the **GeoTIFF** format:
 
 ```{r save map, eval=FALSE}
-map <- predict(model, data = predictors, type = "cloglog", file = "my_map",
+map <- predict(model, 
+               data = predictors, 
+               type = "cloglog", 
+               file = "my_map",
                format = "GTiff")
 ```
 
@@ -327,10 +353,13 @@ The function `predict` has other arguments useful when predicting large datasets
 In the next example we restrict the prediction to Chile and plot the prediction:
 
 ```{r exercise}
-# First create the extent that surrounds Cile
-e = raster::extent(c(-77, -60, -56, -15))
+# First create the extent that surrounds Chile
+e = terra::ext(c(-77, -60, -56, -15))
 # Now use the extent to make the prediction
-map_e <- predict(model, data = predictors, type = "cloglog", extent = e)
+map_e <- predict(model, 
+                 data = predictors, 
+                 type = "cloglog", 
+                 extent = e)
 ```
 
 ## Plot a distribution map
@@ -344,7 +373,8 @@ plotPred(map)
 The function `plotPred` plots a map with a color ramp similar to the one used by the MaxEnt Java software. We can pass additional arguments to customize the map. In the next example we provide a custom color ramp and we add a title to the legend:
 
 ```{r plot map custom}
-plotPred(map, lt = "Habitat\nsuitability",
+plotPred(map, 
+         lt = "Habitat\nsuitability",
          colorramp = c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"))
 ```
 
@@ -353,20 +383,25 @@ plotPred(map, lt = "Habitat\nsuitability",
 To plot a presence/absence map we need a threshold value that splits the prediction in presence and absence values. The function `thresholds` returns some commonly used threshold values starting from an `SDMmodel` object. In the next example we print the threshold values using the type `"cloglog"`:
 
 ```{r thresholds}
-ths <- thresholds(model, type = "cloglog")
+ths <- thresholds(model, 
+                  type = "cloglog")
 ths
 ```
 
 For example we want to create a presence/absence map using the threshold that maximize the training sensitivity plus specificity. We use the function `plotPA` passing the threshold value as argument:
 
 ```{r plot pa}
-plotPA(map, th = ths[3, 2])
+plotPA(map, 
+       th = ths[3, 2])
 ```
 
 We can also save the map in a file with the following code:
 
 ```{r plot and save pa, eval=FALSE}
-plotPA(map, th = ths[3, 2], filename = "my_pa_map", format = "GTiff")
+plotPA(map, 
+       th = ths[3, 2], 
+       filename = "my_pa_map", 
+       format = "GTiff")
 ```
 
 Both functions `plotPred` and `plotPA` have the argument `hr`to plot the the map with high resolution, useful when the map is used in a scientific publication.
@@ -402,9 +437,10 @@ tss(model)
 
 ## AICc
 
-For the AICc we use the function `aicc`. In this case we need to pass to the `env` argument the `predictors` raster `stack` object:
+For the AICc we use the function `aicc`. In this case we need to pass to the `env` argument the `predictors` raster object:
 ```{r aicc}
-aicc(model, env = predictors)
+aicc(model, 
+     env = predictors)
 ```
 
 ## Training and testing
@@ -412,14 +448,17 @@ aicc(model, env = predictors)
 It's always a good practice to split the species locations into two parts and use one part to train the model and the remaining part to evaluate it. We can use the `trainValTest` function for this purpose. Let's say we want to use 80\% of the species locations to train our model and 20\% as testing dataset to evaluate it:
 ```{r train test}
 library(zeallot)  # For unpacking assignment
-c(train, test) %<-% trainValTest(data, test = 0.2, only_presence = TRUE,
+c(train, test) %<-% trainValTest(data, 
+                                 test = 0.2, 
+                                 only_presence = TRUE,
                                  seed = 25)
 ```
 
 Now we train the model using the `train` dataset:
 
 ```{r trai with train dataset}
-model <- train("Maxent", data = train)
+model <- train("Maxent", 
+               data = train)
 ```
 
 The `only_presence` argument is used to split only the presence and not the background locations. We can now evaluate the model using the testing dataset that has not been used to train the model:
@@ -438,6 +477,7 @@ This approach is valid when we have a large dataset. In our case, with only few 
 # Create an empty data.frame
 output <- data.frame(matrix(NA, nrow = 10, ncol = 3))
 colnames(output) <- c("seed", "trainAUC", "testAUC")
+
 # Create 10 different random seeds
 set.seed(25)
 seeds <- sample.int(1000, 10)
@@ -445,10 +485,14 @@ seeds <- sample.int(1000, 10)
 # Loop through the seeds
 for (i in 1:length(seeds)) {
   # Make the train/test split
-  c(train, test) %<-% trainValTest(data, test = 0.2, seed = seeds[i],
+  c(train, test) %<-% trainValTest(data, 
+                                   test = 0.2, 
+                                   seed = seeds[i],
                                    only_presence = TRUE)
+  
   # train the model
   m <- train("Maxent", data = train)
+  
   # Populate the output data.frame
   output[i, 1] <- seeds[i]
   output[i, 2] <- auc(m)
@@ -467,14 +511,19 @@ The testing AUC varies for the different train/test partitions. When we have to 
 
 To perform a cross validation in **SDMtune** we have to pass the `fold` argument to the `train` function. First we have to create the folds. There are several way to create them, here we explain how to make a random partition of 4 folds using the function `randomFolds`:
 ```{r random folds}
-folds <- randomFolds(data, k = 4, only_presence = TRUE, seed = 25)
+folds <- randomFolds(data, 
+                     k = 4, 
+                     only_presence = TRUE, 
+                     seed = 25)
 ```
 
 The output of the function is a list containing two matrices, the first for the training and the second for the testing locations. Each column of one matrix represents a fold with `TRUE` for the locations included in and `FALSE` excluded from the partition.
 
 Let's perform a 4 fold cross validation using the **Maxent** method (note that we use the full dataset):
 ```{r cv, eval=FALSE}
-cv_model <- train("Maxent", data = data, folds = folds)
+cv_model <- train("Maxent", 
+                  data = data, 
+                  folds = folds)
 cv_model
 ```
 
@@ -500,7 +549,11 @@ Block partition using the `ENMeval` package:
 library(ENMeval)
 block_folds <- get.block(occ = data@coords[data@pa == 1, ],
                          bg.coords = data@coords[data@pa == 0, ])
-model <- train(method = "Maxent", data = data, fc = "l", reg = 0.8,
+
+model <- train(method = "Maxent", 
+               data = data, 
+               fc = "l", 
+               reg = 0.8,
                folds = block_folds)
 ```
 
@@ -510,22 +563,36 @@ cb_folds <- get.checkerboard1(occ = data@coords[data@pa == 1, ],
                               env = predictors,
                               bg.coords = data@coords[data@pa == 0, ],
                               aggregation.factor = 4)
-model <- train(method = "Maxent", data = data, fc = "l", reg = 0.8,
+
+model <- train(method = "Maxent", 
+               data = data, 
+               fc = "l", 
+               reg = 0.8,
                folds = cb_folds)
 ```
 
 Environmental block using the package `blockCV`:
 ```{r blockCV}
 library(blockCV)
-library(raster)
 # Create spatial points data frame
-sp_df <- SpatialPointsDataFrame(data@coords,
-                                data = as.data.frame(data@pa),
-                                proj4string = crs(predictors))
-e_folds <- envBlock(rasterLayer = predictors, speciesData = sp_df,
-                    species = "data@pa", k = 4, standardization = "standard",
-                    rasterBlock = FALSE, numLimit = 100)
-model <- train(method = "Maxent", data = data, fc = "l", reg = 0.8,
+sp_df <- sp::SpatialPointsDataFrame(
+  coords = data@coords, 
+  data = as.data.frame(data@pa), 
+  proj4string = sp::CRS(terra::crs(predictors))
+)
+
+e_folds <- envBlock(rasterLayer = predictors, 
+                    speciesData = sp_df,
+                    species = "data@pa", 
+                    k = 4, 
+                    standardization = "standard",
+                    rasterBlock = FALSE, 
+                    numLimit = 100)
+
+model <- train(method = "Maxent", 
+               data = data, 
+               fc = "l", 
+               reg = 0.8,
                folds = e_folds)
 ```
 

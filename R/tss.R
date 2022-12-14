@@ -6,13 +6,13 @@
 #' @param test \linkS4class{SWD} object when `model` is an
 #' \linkS4class{SDMmodel} object; logical or \linkS4class{SWD} object when
 #' `model` is an \linkS4class{SDMmodelCV} object. If not provided it computes
-#' the training TSS, see details. Default is `NULL`.
+#' the training TSS, see details.
 #'
-#' @details For \code{\linkS4class{SDMmodelCV}} objects, the function computes
-#' the mean of the training TSS values of the k-folds. If \code{test = TRUE} it
-#' computes the mean of the testing TSS values for the k-folds. If test is an
-#' \code{\linkS4class{SWD}} object, it computes the mean TSS values for the
-#' provided testing dataset.
+#' @details For \linkS4class{SDMmodelCV} objects, the function computes the
+#' mean of the training TSS values of the k-folds. If `test = TRUE` it computes
+#' the mean of the testing TSS values for the k-folds. If test is an
+#' \linkS4class{SWD} object, it computes the mean TSS values for the provided
+#' testing dataset.
 #'
 #' @return The value of the TSS of the given model.
 #' @export
@@ -29,48 +29,67 @@
 #' @examples
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare presence and background locations
 #' p_coords <- virtualSp$presence
 #' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-#'                    env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species",
+#'                    p = p_coords,
+#'                    a = bg_coords,
+#'                    env = predictors,
+#'                    categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+#' datasets <- trainValTest(data,
+#'                          test = 0.2,
+#'                          only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", data = train, fc = "l")
+#' model <- train(method = "Maxnet",
+#'                data = train,
+#'                fc = "l")
 #'
 #' # Compute the training TSS
 #' tss(model)
 #'
 #' # Compute the testing TSS
-#' tss(model, test)
+#' tss(model,
+#'     test = test)
 #'
 #' \donttest{
 #' # Same example but using cross validation instead of training and testing
 #' # datasets
 #' # Create 4 random folds splitting only the presence locations
-#' folds = randomFolds(train, k = 4, only_presence = TRUE)
-#' model <- train(method = "Maxnet", data = train, fc = "l", folds = folds)
+#' folds = randomFolds(train,
+#'                     k = 4,
+#'                     only_presence = TRUE)
+#'
+#' model <- train(method = "Maxnet",
+#'                data = train,
+#'                fc = "l",
+#'                folds = folds)
 #'
 #' # Compute the training TSS
 #' tss(model)
 #'
 #' # Compute the testing TSS
-#' tss(model, test = TRUE)
+#' tss(model,
+#'     test = TRUE)
 #'
 #' # Compute the TSS for the held apart testing dataset
-#' tss(model, test = test)
+#' tss(model,
+#'     test = test)
 #' }
-tss <- function(model, test = NULL) {
+tss <- function(model,
+                test = NULL) {
 
   if (inherits(model, "SDMmodel")) {
     tss <- .compute_tss(model, test)
@@ -92,10 +111,11 @@ tss <- function(model, test = NULL) {
     tss <- mean(tsss)
   }
 
-  return(tss)
+  tss
 }
 
-.compute_tss <- function(model, test) {
+.compute_tss <- function(model,
+                         test) {
 
   if (inherits(model@model, "Maxent")) {
     type <- "raw"
@@ -108,5 +128,5 @@ tss <- function(model, test = NULL) {
   tnr <- cm$tn / (cm$fp + cm$tn)
   tss <- tpr + tnr - 1
 
-  return(max(tss))
+  max(tss)
 }

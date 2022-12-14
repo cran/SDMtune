@@ -7,7 +7,7 @@
 #' the train or testing dataset.
 #' @param ref numeric. The value of the chosen metric for the model trained
 #' using all the variables. If provided it plots a vertical line showing the
-#' reference value. Default is `NULL`.
+#' reference value.
 #'
 #' @return A \link[ggplot2]{ggplot} object.
 #' @export
@@ -20,36 +20,53 @@
 #' \donttest{
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare presence and background locations
 #' p_coords <- virtualSp$presence
 #' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-#'                    env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species",
+#'                    p = p_coords,
+#'                    a = bg_coords,
+#'                    env = predictors,
+#'                    categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+#' datasets <- trainValTest(data,
+#'                          test = 0.2,
+#'                          only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", data = train, fc = "lq")
+#' model <- train(method = "Maxnet",
+#'                data = train,
+#'                fc = "lq")
 #'
 #' # Execute the Jackknife test for all the environmental variables using the
 #' # metric AUC
-#' jk <- doJk(model, metric = "auc", test = test)
+#' jk <- doJk(model,
+#'            metric = "auc",
+#'            test = test)
 #'
 #' # Plot Jackknife test result for training
-#' plotJk(jk, type = "train", ref = auc(model))
+#' plotJk(jk,
+#'        type = "train",
+#'        ref = auc(model))
 #'
 #' #' # Plot Jackknife test result for testing
-#' plotJk(jk, type = "test", ref = auc(model, test = test))
+#' plotJk(jk,
+#'        type = "test",
+#'        ref = auc(model, test = test))
 #' }
-plotJk <- function(jk, type = c("train", "test"), ref = NULL) {
+plotJk <- function(jk,
+                   type = c("train", "test"),
+                   ref = NULL) {
 
   if (!is.data.frame(jk))
     jk <- jk$results
@@ -68,7 +85,7 @@ plotJk <- function(jk, type = c("train", "test"), ref = NULL) {
   }
 
   if (type == "test" & metric == "aicc")
-    stop("Test mode is not available with aicc!")
+    cli::cli_abort("Test mode is not available with aicc.")
 
   if (metric != "aicc") {
     if (type == "train") {
@@ -110,5 +127,5 @@ plotJk <- function(jk, type = c("train", "test"), ref = NULL) {
     my_plot <- my_plot +
     ggplot2::geom_hline(yintercept = ref, linetype = "dashed", color = "red")
 
-  return(my_plot)
+  my_plot
 }

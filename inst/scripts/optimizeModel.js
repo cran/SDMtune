@@ -1,3 +1,4 @@
+// Optimize Model Script
 // Variables rendered by Whisker
 var settings = {{{ settings }}};
 var data = {{{ data }}};
@@ -190,9 +191,10 @@ update = function() {
     $.ajax({
       method: "GET",
       url: "data.json",
-      cache: false
+      cache: false,
+      dataType: "json"
     }).done(function (json) {
-      data = JSON.parse(json);
+      data = json;
       init();
 
       if (data.stop[0]) {

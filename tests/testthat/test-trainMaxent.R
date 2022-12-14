@@ -4,7 +4,7 @@ skip_on_cran()
 test_that("The correct fc arguments are created", {
   expect_equal(.get_fc_args("lqpht"),
                c("noautofeature", "threshold"))
-  expect_error(.get_fc_args("lb"))
+  expect_snapshot_error(.get_fc_args("lb"))
 })
 
 # .make_args
@@ -53,29 +53,38 @@ test_that("Constants are parsed correctly", {
 test_that("The correct linear feature is created", {
   l <- .get_lambdas(linear)
   expect_equal(l$lambdas,
-               data.frame(feature = "bio1", lambda = -0.44, min = 61.0,
-                          max = 42.0, stringsAsFactors = FALSE))
+               data.frame(feature = "bio1",
+                          lambda = -0.44,
+                          min = 61.0,
+                          max = 42.0))
   expect_equal(l$min_max,
-               data.frame(variable = "bio1", min = 61.0, max = 42.0,
-                          stringsAsFactors = FALSE))
+               data.frame(variable = "bio1",
+                          min = 61.0,
+                          max = 42.0))
 })
 
 test_that("The correct quadratic feature is created", {
   expect_equal(.get_lambdas(quadratic)$lambdas,
-               data.frame(feature = "I(bio1^2)", lambda = -0.44, min = 61.0,
-                          max = 42.0, stringsAsFactors = FALSE))
+               data.frame(feature = "I(bio1^2)",
+                          lambda = -0.44,
+                          min = 61.0,
+                          max = 42.0))
 })
 
 test_that("The correct product feature is created", {
   expect_equal(.get_lambdas(product)$lambdas,
-               data.frame(feature = "I(bio1*bio16)", lambda = -0.44, min = 61.0,
-                          max = 42.0, stringsAsFactors = FALSE))
+               data.frame(feature = "I(bio1*bio16)",
+                          lambda = -0.44,
+                          min = 61.0,
+                          max = 42.0))
 })
 
 test_that("The correct hinge feature is created", {
   expect_equal(.get_lambdas(hinge)$lambdas,
-               data.frame(feature = ".hinge(bio1, 61, 42)", lambda = -0.44,
-                          min = 61.0, max = 42.0, stringsAsFactors = FALSE))
+               data.frame(feature = ".hinge(bio1, 61, 42)",
+                          lambda = -0.44,
+                          min = 61.0,
+                          max = 42.0))
   # Variable lower than minimum (hinge)
   expect_equal(.hinge(41.9, 42, 61), 0)
   # Variable equal to minimum (hinge)
@@ -88,8 +97,10 @@ test_that("The correct hinge feature is created", {
 
 test_that("The correct reverse hinge feature is created", {
   expect_equal(.get_lambdas(rev_hinge)$lambdas,
-               data.frame(feature = ".rev_hinge(bio1, 61, 42)", lambda = -0.44,
-                          min = 61.0, max = 42.0, stringsAsFactors = FALSE))
+               data.frame(feature = ".rev_hinge(bio1, 61, 42)",
+                          lambda = -0.44,
+                          min = 61.0,
+                          max = 42.0))
   # Variable equal to minimum
   expect_equal(.rev_hinge(42, 42, 61), 1)
   # Variable lower than maximum
@@ -102,8 +113,10 @@ test_that("The correct reverse hinge feature is created", {
 
 test_that("The correct threshold feature is created", {
   expect_equal(.get_lambdas(threshold)$lambdas,
-               data.frame(feature = ".threshold(bio1, 500)", lambda = -0.44,
-                          min = 0, max = 1, stringsAsFactors = FALSE))
+               data.frame(feature = ".threshold(bio1, 500)",
+                          lambda = -0.44,
+                          min = 0,
+                          max = 1))
   # Variable lower than threshold
   expect_equal(.threshold(300, 500), 0)
   # Variable equal to threshold
@@ -114,8 +127,10 @@ test_that("The correct threshold feature is created", {
 
 test_that("The correct categorical feature is created", {
   expect_equal(.get_lambdas(categ)$lambdas,
-               data.frame(feature = ".categorical(biome, 1.0)", lambda = -0.44,
-                          min = 0, max = 1, stringsAsFactors = FALSE))
+               data.frame(feature = ".categorical(biome, 1.0)",
+                          lambda = -0.44,
+                          min = 0,
+                          max = 1))
   # Variable lower than category
   expect_equal(.categorical(0, 1), 0)
   # Variable equal to category
@@ -124,12 +139,12 @@ test_that("The correct categorical feature is created", {
   expect_equal(.categorical(2, 1), 0)
 })
 
-skip_on_ci()
-skip_on_covr()
-
-#.train
+# train
 test_that("The function trainMaxent produces the correct ouput", {
-  m <- trainMaxent(data = SDMtune:::t, reg = 1.2, fc = "l")
+  m <- trainMaxent(data = SDMtune:::t,
+                   reg = 1.2,
+                   fc = "l")
+
   expect_s4_class(m, "SDMmodel")
   expect_s4_class(m@model, "Maxent")
   expect_s4_class(m@data, "SWD")

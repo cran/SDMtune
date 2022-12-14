@@ -9,7 +9,8 @@
 #' AUC is computed.
 #'
 #' @param model \linkS4class{SDMmodel} or \linkS4class{SDMmodelCV} object.
-#' @param permut integer. Number of permutations, default is 10.
+#' @param permut integer. Number of permutations.
+#' @param progress logical. If `TRUE` shows a progress bar.
 #'
 #' @details Note that it could return values slightly different from MaxEnt Java
 #' software due to a different random permutation.
@@ -27,39 +28,59 @@
 #' \donttest{
 #' # Acquire environmental variables
 #' files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
-#'                     pattern = "grd", full.names = TRUE)
-#' predictors <- raster::stack(files)
+#'                     pattern = "grd",
+#'                     full.names = TRUE)
+#'
+#' predictors <- terra::rast(files)
 #'
 #' # Prepare presence and background locations
 #' p_coords <- virtualSp$presence
 #' bg_coords <- virtualSp$background
 #'
 #' # Create SWD object
-#' data <- prepareSWD(species = "Virtual species", p = p_coords, a = bg_coords,
-#'                    env = predictors, categorical = "biome")
+#' data <- prepareSWD(species = "Virtual species",
+#'                    p = p_coords,
+#'                    a = bg_coords,
+#'                    env = predictors,
+#'                    categorical = "biome")
 #'
 #' # Split presence locations in training (80%) and testing (20%) datasets
-#' datasets <- trainValTest(data, test = 0.2, only_presence = TRUE)
+#' datasets <- trainValTest(data,
+#'                          test = 0.2,
+#'                          only_presence = TRUE)
 #' train <- datasets[[1]]
 #' test <- datasets[[2]]
 #'
 #' # Train a model
-#' model <- train(method = "Maxnet", data = train, fc = "l")
+#' model <- train(method = "Maxnet",
+#'                data = train,
+#'                fc = "l")
 #'
 #' # Compute variable importance
-#' vi <- varImp(model, permut = 5)
+#' vi <- varImp(model,
+#'              permut = 5)
 #' vi
 #'
 #' # Same example but using cross validation instead of training and testing
 #' # datasets
 #' # Create 4 random folds splitting only the presence locations
-#' folds = randomFolds(data, k = 4, only_presence = TRUE)
-#' model <- train(method = "Maxnet", data = data, fc = "l", folds = folds)
+#' folds = randomFolds(data,
+#'                     k = 4,
+#'                     only_presence = TRUE)
+#'
+#' model <- train(method = "Maxnet",
+#'                data = data,
+#'                fc = "l",
+#'                folds = folds)
+#'
 #' # Compute variable importance
-#' vi <- varImp(model, permut = 5)
+#' vi <- varImp(model,
+#'              permut = 5)
 #' vi
 #' }
-varImp <- function(model, permut = 10) {
+varImp <- function(model,
+                   permut = 10,
+                   progress = TRUE) {
 
   vars <- colnames(model@data@data)
 
@@ -70,22 +91,30 @@ varImp <- function(model, permut = 10) {
     total <- length(vars) * l
   }
 
-  pb <- progress::progress_bar$new(
-    format = "Variable importance [:bar] :percent in :elapsedfull",
-    total = total, clear = FALSE, width = 60, show_after = 0)
-  pb$tick(0)
+  if (progress)
+    id <- cli::cli_progress_bar(
+      name = "Variable importance",
+      type = "iterator",
+      format = "{cli::pb_name} {cli::pb_bar} {cli::pb_percent} | \\
+                ETA: {cli::pb_eta} - {cli::pb_elapsed_clock}",
+      total = total,
+      clear = FALSE
+    )
 
   if (inherits(model, "SDMmodel")) {
     model_auc <- auc(model)
-    output <- .compute_permutation(model, model_auc, vars, permut, pb)
+    output <- .compute_permutation(model, model_auc, vars, permut, id, progress)
   } else {
     pis <- matrix(nrow = length(vars), ncol = l)
+
     for (i in 1:l) {
       model_auc <- auc(model@models[[i]])
-      df <- .compute_permutation(model@models[[i]], model_auc, vars, permut, pb)
+      df <- .compute_permutation(model@models[[i]], model_auc, vars, permut, id,
+                                 progress)
       index <- match(df[, 1], vars)
       pis[, i] <- df[order(index), 2]
     }
+
     output <- data.frame(Variable = vars,
                          Permutation_importance = rowMeans(pis),
                          sd = round(apply(pis, 1, sd), 3),
@@ -95,10 +124,15 @@ varImp <- function(model, permut = 10) {
   output <- output[order(output$Permutation_importance, decreasing = TRUE), ]
   row.names(output) <- NULL
 
-  return(output)
+  output
 }
 
-.compute_permutation <- function(model, model_auc, vars, permut, pb) {
+.compute_permutation <- function(model,
+                                 model_auc,
+                                 vars,
+                                 permut,
+                                 id,
+                                 progress) {
 
   permuted_auc <- matrix(nrow = permut, ncol = length(vars))
   set.seed(25)
@@ -112,7 +146,9 @@ varImp <- function(model, permut = 10) {
       train_copy@data[, vars[j]] <- data
       permuted_auc[i, j] <- auc(model, train_copy)
     }
-    pb$tick(1)
+
+    if (progress)
+      cli::cli_progress_update(id = id, .envir = parent.frame(n = 2))
   }
 
   if (permut > 1) {
@@ -129,5 +165,5 @@ varImp <- function(model, permut = 10) {
   if (permut > 1)
     output$sd <- round(sd_auc, 3)
 
-  return(output)
+  output
 }

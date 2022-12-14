@@ -17,8 +17,6 @@ test_that("The function uses the testing dataset", {
 })
 
 test_that("The function raises errors", {
-  expect_error(tss(m, SDMtune:::t@data),
-               "\"test\" argument invalid, use an SWD object.")
-  expect_error(tss(m_cv, SDMtune:::t@data),
-               "\"test\" argument invalid, use an SWD object.")
+  expect_snapshot_error(tss(m, SDMtune:::t@data))
+  expect_snapshot_error(tss(m_cv, SDMtune:::t@data))
 })
