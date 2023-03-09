@@ -951,26 +951,25 @@ environmentally independent.</p>
 <span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>               <span class="at">folds =</span> cb_folds)</span></code></pre></div>
 <p>Environmental block using the package <code>blockCV</code>:</p>
 <div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(blockCV)</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create spatial points data frame</span></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>sp_df <span class="ot">&lt;-</span> sp<span class="sc">::</span><span class="fu">SpatialPointsDataFrame</span>(</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords =</span> data<span class="sc">@</span>coords, </span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">as.data.frame</span>(data<span class="sc">@</span>pa), </span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">proj4string =</span> sp<span class="sc">::</span><span class="fu">CRS</span>(terra<span class="sc">::</span><span class="fu">crs</span>(predictors))</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>e_folds <span class="ot">&lt;-</span> <span class="fu">envBlock</span>(<span class="at">rasterLayer =</span> predictors, </span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">speciesData =</span> sp_df,</span>
-<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>                    <span class="at">species =</span> <span class="st">&quot;data@pa&quot;</span>, </span>
-<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>                    <span class="at">k =</span> <span class="dv">4</span>, </span>
-<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>                    <span class="at">standardization =</span> <span class="st">&quot;standard&quot;</span>,</span>
-<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">rasterBlock =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">numLimit =</span> <span class="dv">100</span>)</span>
-<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">method =</span> <span class="st">&quot;Maxent&quot;</span>, </span>
-<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> data, </span>
-<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>               <span class="at">fc =</span> <span class="st">&quot;l&quot;</span>, </span>
-<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>               <span class="at">reg =</span> <span class="fl">0.8</span>,</span>
-<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>               <span class="at">folds =</span> e_folds)</span></code></pre></div>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create sf object</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>sf_df <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_as_sf</span>(<span class="fu">cbind</span>(data<span class="sc">@</span>coords, <span class="at">pa =</span> data<span class="sc">@</span>pa),</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>),</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">crs =</span> terra<span class="sc">::</span><span class="fu">crs</span>(predictors,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">proj =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Spatial blocks</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>spatial_folds <span class="ot">&lt;-</span> <span class="fu">cv_spatial</span>(<span class="at">x =</span> sf_df,</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>                            <span class="at">column =</span> <span class="st">&quot;pa&quot;</span>,</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>                            <span class="at">rows_cols =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">10</span>),</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>                            <span class="at">k =</span> <span class="dv">5</span>,</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>                            <span class="at">hexagon =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>                            <span class="at">selection =</span> <span class="st">&quot;systematic&quot;</span>)</span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">method =</span> <span class="st">&quot;Maxent&quot;</span>, </span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> data, </span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">fc =</span> <span class="st">&quot;l&quot;</span>, </span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>               <span class="at">reg =</span> <span class="fl">0.8</span>,</span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>               <span class="at">folds =</span> spatial_folds)</span></code></pre></div>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">

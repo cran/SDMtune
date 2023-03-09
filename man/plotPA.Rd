@@ -12,7 +12,6 @@ plotPA(
   filename = "",
   overwrite = FALSE,
   wopt = list(),
-  format = "",
   ...
 )
 }
@@ -33,8 +32,6 @@ must include the extension.}
 \item{overwrite}{logical. If \code{TRUE} an existing file is overwritten.}
 
 \item{wopt}{list. Writing options passed to \link[terra]{writeRaster}.}
-
-\item{format}{character. Deprecated.}
 
 \item{...}{Unused arguments.}
 }

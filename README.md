@@ -12,7 +12,7 @@ Status](https://www.r-pkg.org/badges/version-last-release/SDMtune)](https://cran
 [![CRAN RStudio mirror
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/SDMtune)](https://www.r-pkg.org/pkg/SDMtune)
 [![Coverage
-status](https://codecov.io/gh/ConsBiol-unibern/SDMtune/branch/master/graph/badge.svg)](https://codecov.io/github/ConsBiol-unibern/SDMtune?branch=master)
+status](https://codecov.io/gh/ConsBiol-unibern/SDMtune/branch/master/graph/badge.svg)](https://app.codecov.io/github/ConsBiol-unibern/SDMtune?branch=master)
 <!-- badges: end -->
 
 **SDMtune** provides a user-friendly framework that enables the training
@@ -73,7 +73,7 @@ library(SDMtune)
 # Acquire environmental variables
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"),
                     pattern = "grd", full.names = TRUE)
-predictors <- raster::stack(files)
+predictors <- terra::rast(files)
 
 # Prepare presence and background locations
 p_coords <- virtualSp$presence

@@ -170,7 +170,7 @@ plotResponse <- function(model,
       my_plot <- ggplot(plot_data, aes(x = .data$x, y = .data$y)) +
         ggplot2::geom_bar(stat = "identity", fill = color) +
         ggplot2::geom_errorbar(aes(ymin = .data$y_min, ymax = .data$y_max),
-                               width = 0.2, size = 0.3)
+                               width = 0.2, linewidth = 0.3)
     }
   }
 
@@ -206,7 +206,7 @@ plotResponse <- function(model,
   data <- data.frame(matrix(NA, nrow = 1, ncol = ncol(df)))
   colnames(data) <- colnames(df)
   data[cont_vars] <- apply(df[cont_vars], 2, fun)
-  data[cat_vars] <- as.factor(apply(df[cat_vars], 2, raster::modal))
+  data[cat_vars] <- as.factor(apply(df[cat_vars], 2, terra::modal))
   data <- do.call("rbind", replicate(n_rows, data, simplify = FALSE))
 
   if (var %in% cont_vars) {
