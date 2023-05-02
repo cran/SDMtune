@@ -30,9 +30,16 @@ ANN <- setClass("ANN",
 setMethod("show",
           signature = "ANN",
           definition = function(object) {
-            cat("Class:", class(object), "\n")
-            cat("size :", object@size, "\n")
-            cat("decay:", object@decay, "\n")
-            cat("rang :", object@rang, "\n")
-            cat("maxit:", object@maxit, "\n")
+            cli::cli_h2("Object of class: {.cls {class(object)}}")
+
+            cli::cli_par()
+            cli::cli_text("Method: {.emph Artificial Neural Networks}")
+            cli::cli_end()
+
+            cli::cli_h3("Hyperparameters")
+
+            cli::cli_li("{.field size}: {.val {object@size}}")
+            cli::cli_li("{.field decay}: {.val {object@decay}}")
+            cli::cli_li("{.field rang}: {.val {object@rang}}")
+            cli::cli_li("{.field maxit}: {.val {object@maxit}}")
           })

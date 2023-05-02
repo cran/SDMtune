@@ -3,15 +3,14 @@ title: "Evaluate a model"
 bibliography: ../SDMtune.bib
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE,
+                      comment = "#>",
+                      fig.align = "center")
 options(knitr.table.format = "html")
 ```
 
-```{r load data, echo=FALSE, message=FALSE}
+```{r load-data, echo=FALSE, message=FALSE}
 default_model <- SDMtune:::bm_maxent
 files <- list.files(path = file.path(system.file(package = "dismo"), "ex"), 
                     pattern = "grd", 
@@ -35,23 +34,26 @@ We will compute the value of the metrics on the training dataset, using the `def
 
 As usually we first load the **SDMtune** package:
 
-```{r load SDMtune, warning=FALSE}
+```{r load-SDMtune}
 library(SDMtune)
 ```
 
 The AUC can be calculated using the function `auc()`:
+
 ```{r auc}
 auc(default_model)
 ```
 
 We can also plot the ROC curve using the function `plotROC()`:
-```{r plot roc, fig.align="center"}
+
+```{r plot-roc}
 plotROC(default_model)
 ```
 
 ## TSS
 
 The TSS is computed with the function `tss()`:
+
 ```{r tss}
 tss(default_model)
 ```
@@ -59,6 +61,7 @@ tss(default_model)
 ## AICc
 
 For the AICc we use the function `aicc()`. In this case we need to pass to the `env` argument the 'predictors' raster object that we created in the [first article](./prepare-data.html#acquire-environmental-variables):
+
 ```{r aicc}
 aicc(default_model, 
      env = predictors)

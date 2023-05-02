@@ -1,8 +1,10 @@
-## ---- include = FALSE---------------------------------------------------------
-knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
+## ----knitr-options, include=FALSE---------------------------------------------
+knitr::opts_chunk$set(comment = "#>",
+                      collapse = TRUE,
+                      eval = FALSE,
                       fig.align = "center")
 
-## ----load data----------------------------------------------------------------
+## ----load-data----------------------------------------------------------------
 #  library(SDMtune)
 #  library(zeallot)
 #  
@@ -33,8 +35,8 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  model <- train("Maxnet",
 #                 data = train)
 
-## ----tune bg------------------------------------------------------------------
-#  # Define the values for bg
+## ----tune-reg-----------------------------------------------------------------
+#  # Define the values for the regularization multiplier
 #  h <- list(reg = seq(0.2, 1, 0.1))
 #  
 #  # Call the gridSearch function
@@ -43,25 +45,25 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                      metric = "auc",
 #                      test = val)
 
-## ----print exp_1--------------------------------------------------------------
+## ----print-exp-1--------------------------------------------------------------
 #  exp_1
 
-## ----plot exp_1---------------------------------------------------------------
+## ----plot-exp-1---------------------------------------------------------------
 #  plot(exp_1,
 #       title = "Experiment 1")
 
-## ----plot exp_1 iter----------------------------------------------------------
+## ----plot-exp-1-iter----------------------------------------------------------
 #  plot(exp_1,
 #       title = "Experiment 1",
 #       interactive = TRUE)
 
-## ----slot results-------------------------------------------------------------
+## ----slot-results-------------------------------------------------------------
 #  exp_1@results
 
-## ----order results------------------------------------------------------------
+## ----order-results------------------------------------------------------------
 #  exp_1@results[order(-exp_1@results$test_AUC), ]
 
-## ----exercise 1, eval=FALSE, class.source='exercise'--------------------------
+## ----exercise-1, eval=FALSE, class.source='exercise'--------------------------
 #  # Define the values for reg
 #  h <- list(reg = 1:4)
 #  
@@ -71,7 +73,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                      metric = "tss",
 #                      test = val)
 
-## ----exercise 2, eval=FALSE, class.source='exercise'--------------------------
+## ----exercise-2, eval=FALSE, class.source='exercise'--------------------------
 #  # Define the values for fc
 #  h <- list(fc = c("l", "lq", "lh", "lqp", "lqph", "lqpht"))
 #  
@@ -81,7 +83,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                      metric = "auc",
 #                      test = val)
 
-## ----exercise 3, eval=FALSE, class.source='exercise'--------------------------
+## ----exercise-3, eval=FALSE, class.source='exercise'--------------------------
 #  maxent_model <- train("Maxent",
 #                        data = data)
 #  
@@ -94,10 +96,10 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                      metric = "auc",
 #                      test = val)
 
-## ----get hypers---------------------------------------------------------------
+## ----get-hypers---------------------------------------------------------------
 #  getTunableArgs(model)
 
-## ----exp 5, eval=FALSE--------------------------------------------------------
+## ----exp-5, eval=FALSE--------------------------------------------------------
 #  h <- list(reg = seq(0.2, 2, 0.2),
 #            fc = c("l", "lq", "lh", "lqp", "lqph", "lqpht"))
 #  
@@ -106,7 +108,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                      metric = "auc",
 #                      test = val)
 
-## ----random search------------------------------------------------------------
+## ----random-search------------------------------------------------------------
 #  h <- list(reg = seq(0.2, 5, 0.2),
 #            fc = c("l", "lq", "lh", "lp", "lqp", "lqph"))
 #  
@@ -117,10 +119,10 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                        pop = 10,
 #                        seed = 65466)
 
-## ----sdmtune results----------------------------------------------------------
+## ----sdmtune-results----------------------------------------------------------
 #  exp_6@results
 
-## ----optimize model, eval=FALSE-----------------------------------------------
+## ----optimize-model, eval=FALSE-----------------------------------------------
 #  exp_7 <- optimizeModel(model,
 #                         hypers = h,
 #                         metric = "auc",
@@ -141,16 +143,16 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                          val,
 #                          only_presence = TRUE)
 
-## ----final model--------------------------------------------------------------
+## ----final-model--------------------------------------------------------------
 #  final_model <- train("Maxnet",
 #                       data = merged_data,
 #                       fc = exp_6@results[index, 1],
 #                       reg = exp_6@results[index, 2])
 
-## ----final evaluation---------------------------------------------------------
+## ----final-evaluation---------------------------------------------------------
 #  auc(final_model, test = test)
 
-## ----cross validation---------------------------------------------------------
+## ----cross-validation---------------------------------------------------------
 #  # Create the folds from the training dataset
 #  folds <- randomFolds(train,
 #                       k = 4,
@@ -162,7 +164,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                    data = train,
 #                    folds = folds)
 
-## ----randomSearch cv----------------------------------------------------------
+## ----randomSearch-cv----------------------------------------------------------
 #  h <- list(reg = seq(0.2, 5, 0.2),
 #            fc = c("l", "lq", "lh", "lp", "lqp", "lqph"))
 #  
@@ -172,11 +174,8 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                        pop = 10,
 #                        seed = 65466)
 
-## ----final evaluation cv------------------------------------------------------
-#  final_model <- train("Maxent",
-#                       data = exp_8@models[[1]]@data,
-#                       fc = exp_8@results[1, 1],
-#                       reg = exp_8@results[1, 2])
+## ----final-evaluation-cv------------------------------------------------------
+#  final_model <- combineCV(exp_8@models[[1]])
 #  
 #  auc(final_model, test = test)
 

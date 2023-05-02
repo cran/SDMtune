@@ -1,8 +1,10 @@
-## ---- include = FALSE---------------------------------------------------------
-knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
+## ----knitr-options, include=FALSE---------------------------------------------
+knitr::opts_chunk$set(comment = "#>",
+                      collapse = TRUE,
+                      eval = FALSE,
                       fig.align = "center")
 
-## ----load data----------------------------------------------------------------
+## ----load-data----------------------------------------------------------------
 #  library(SDMtune)
 #  library(zeallot)
 #  
@@ -36,33 +38,33 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                    data = data,
 #                    folds = folds)
 
-## ----maxent results-----------------------------------------------------------
+## ----maxent-results-----------------------------------------------------------
 #  model@model@results
 
-## ----maxent var importance----------------------------------------------------
+## ----maxent-var-importance----------------------------------------------------
 #  vi <- maxentVarImp(model)
 #  vi
 
-## ----maxent percent contribution plot-----------------------------------------
+## ----maxent-percent-contribution-plot-----------------------------------------
 #  plotVarImp(vi[, 1:2])
 
-## ----maxent permutation importance plot---------------------------------------
+## ----maxent-permutation-importance-plot---------------------------------------
 #  plotVarImp(vi[, c(1,3)])
 
-## ----maxnet model-------------------------------------------------------------
+## ----maxnet-model-------------------------------------------------------------
 #  maxnet_model <- train("Maxnet",
 #                        data = train)
 
-## -----------------------------------------------------------------------------
+## ----variable-importance------------------------------------------------------
 #  vi_maxnet <- varImp(maxnet_model,
 #                      permut = 5)
 #  
 #  vi_maxnet
 
-## ----plot var imp-------------------------------------------------------------
+## ----plot-var-imp-------------------------------------------------------------
 #  plotVarImp(vi_maxnet)
 
-## ----permut exercise----------------------------------------------------------
+## ----permut-exercise----------------------------------------------------------
 #  # Compute the permutation importance
 #  vi_maxent <- varImp(model,
 #                      permut = 10)
@@ -80,17 +82,17 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  
 #  jk
 
-## ----plot jk train------------------------------------------------------------
+## ----plot-jk-train------------------------------------------------------------
 #  plotJk(jk,
 #         type = "train",
 #         ref = auc(maxnet_model))
 
-## ----plot jk test, fig.align="center"-----------------------------------------
+## ----plot-jk-test-------------------------------------------------------------
 #  plotJk(jk,
 #         type = "test",
 #         ref = auc(maxnet_model, test = test))
 
-## ----plot bio1, fig.align="center"--------------------------------------------
+## ----plot-bio1----------------------------------------------------------------
 #  plotResponse(maxnet_model,
 #               var = "bio1",
 #               type = "cloglog",
@@ -98,7 +100,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #               marginal = FALSE,
 #               rug = TRUE)
 
-## ----plot biome, fig.align="center"-------------------------------------------
+## ----plot-biome---------------------------------------------------------------
 #  plotResponse(maxnet_model,
 #               var = "biome",
 #               type = "logistic",
@@ -107,7 +109,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #               fun = mean,
 #               color = "blue")
 
-## ----plot cv response---------------------------------------------------------
+## ----plot-cv-response---------------------------------------------------------
 #  plotResponse(cv_model,
 #               var = "bio1",
 #               type = "cloglog",
@@ -140,12 +142,12 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                   env = predictors,
 #                   categorical = "biome")
 
-## ----heat map-----------------------------------------------------------------
+## ----heat-map-----------------------------------------------------------------
 #  plotCor(bg,
 #          method = "spearman",
 #          cor_th = 0.7)
 
-## ----cor var------------------------------------------------------------------
+## ----cor-var------------------------------------------------------------------
 #  corVar(bg,
 #         method = "spearman",
 #         cor_th = 0.7)
@@ -159,10 +161,10 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #                                     cor_th = 0.7,
 #                                     permut = 1)
 
-## ----output varSel------------------------------------------------------------
+## ----output-varSel------------------------------------------------------------
 #  selected_variables_model
 
-## ----exercise 1---------------------------------------------------------------
+## ----exercise-1---------------------------------------------------------------
 #  selected_variables_model <- varSel(model,
 #                                     metric = "aicc",
 #                                     bg4cor = bg,
@@ -175,7 +177,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  varImp(model,
 #         permut = 1)
 
-## ----reduce var 1-------------------------------------------------------------
+## ----reduce-var-1-------------------------------------------------------------
 #  cat("Testing AUC before: ", auc(maxnet_model, test = test))
 #  
 #  reduced_variables_model <- reduceVar(maxnet_model,
@@ -186,7 +188,7 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE,
 #  
 #  cat("Testing AUC after: ", auc(reduced_variables_model, test = test))
 
-## ----reduce var 2-------------------------------------------------------------
+## ----reduce-var-2-------------------------------------------------------------
 #  cat("Testing AUC before: ", auc(maxnet_model, test = test))
 #  
 #  reduced_variables_model <- reduceVar(maxnet_model,

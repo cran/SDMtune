@@ -47,20 +47,25 @@ setMethod(
   signature = "SWD",
   definition = function(object) {
     cont_vars <- names(Filter(is.numeric, object@data))
+
     if (length(cont_vars) == 0)
       cont_vars <- NA
+
     cat_vars <- names(Filter(is.factor, object@data))
+
     if (length(cat_vars) == 0)
       cat_vars <- NA
 
-    cat("Object of class", class(object), "\n\n")
+    cli::cli_h2("Object of class: {.cls {class(object)}}")
 
-    cat("Species:", object@species, "\n")
-    cat("Presence locations:",  nrow(object@data[object@pa == 1, ]), "\n")
-    cat("Absence locations:",  nrow(object@data[object@pa == 0, ]), "\n\n")
+    cli::cli_h3("Info")
 
-    cat("Variables:\n")
-    cat("---------\n")
-    cat("Continuous:", cont_vars, "\n")
-    cat("Categorical:", cat_vars, "\n")
+    cli::cli_li("{.field Species}: {.emph {object@species}}")
+    cli::cli_li("{.field Presence locations}: {.val {sum(object@pa == 1)}}")
+    cli::cli_li("{.field Absence locations}: {.val {sum(object@pa == 0)}}")
+
+    cli::cli_h3("Variables")
+
+    cli::cli_li("{.field Continuous}: {.val {cont_vars}}")
+    cli::cli_li("{.field Categorical}: {.val {cat_vars}}")
   })

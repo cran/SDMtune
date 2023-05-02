@@ -23,15 +23,17 @@ setMethod("show",
 
     tunable_hypers <- getTunableArgs(object@models[[1]])
 
-    cat("Object of class: ", class(object), "\n\n")
+    cli::cli_h2("Object of class: {.cls {class(object)}}")
 
-    cat("Models configuration:\n")
-    cat("--------------------\n")
+    cli::cli_par()
+    cli::cli_text("Method: {.emph { .get_method(object@models[[1]])}}")
+    cli::cli_end()
+
+    cli::cli_h3("Tested hyperparameters")
 
     for (i in seq_along(tunable_hypers)) {
-      h <- paste(sort(unique(object@results[, tunable_hypers[i]])),
-                 collapse = ", ")
-      cat(tunable_hypers[i], ": ", h, "\n", sep = "")
+      h <- sort(unique(object@results[, tunable_hypers[i]]))
+      cli::cli_li("{.field {tunable_hypers[i]}}: {.val {h}}")
     }
   }
 )
@@ -89,6 +91,7 @@ if (!isGeneric("plot"))
 #'
 #' # Run the gridSearch function using as metric the AUC
 #' output <- gridSearch(model, hypers = h, metric = "auc", test = test)
+#' output
 #'
 #' # Plot the output
 #' plot(output, title = "My experiment")

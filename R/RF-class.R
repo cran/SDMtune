@@ -28,8 +28,15 @@ RF <- setClass("RF",
 setMethod("show",
           signature = "RF",
           definition = function(object) {
-            cat("Class   :", class(object), "\n")
-            cat("mtry    :", object@mtry, "\n")
-            cat("ntree   :", object@ntree, "\n")
-            cat("nodesize:", object@nodesize, "\n")
+            cli::cli_h2("Object of class: {.cls {class(object)}}")
+
+            cli::cli_par()
+            cli::cli_text("Method: {.emph Random Forest}")
+            cli::cli_end()
+
+            cli::cli_h3("Hyperparameters")
+
+            cli::cli_li("{.field mtry}: {.val {object@mtry}}")
+            cli::cli_li("{.field ntree}: {.val {object@ntree}}")
+            cli::cli_li("{.field nodesize}: {.val {object@nodesize}}")
           })

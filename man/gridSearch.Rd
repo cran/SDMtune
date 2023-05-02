@@ -98,8 +98,8 @@ output <- gridSearch(model,
 output@results
 output@models
 
-# Order rusults by highest test AUC
-head(output@results[order(-output@results$test_AUC), ])
+# Order results by highest test AUC
+output@results[order(-output@results$test_AUC), ]
 
 # Run the function using the AICc as metric and without saving the trained
 # models, helpful when numerous hyperparameters are tested to avoid memory

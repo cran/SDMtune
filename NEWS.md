@@ -1,4 +1,9 @@
-# SDMtune 1.2.0.9000
+# SDMtune 1.3.0
+* Add function to combine cross validation models
+* Improve show method for package outputs
+* Fix CRAN note for undeclared package in Rd file
+
+# SDMtune 1.2.1
 * `plotCor()`gains the argument `text_size` to tweak the size of the text in the plot
 * Cross validation folds can be created with `blockCV` version 3.x (#24)
 * Support for the `raster` package has been deprecated (#23)
