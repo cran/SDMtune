@@ -14,7 +14,6 @@ User-friendly framework that enables the training and the evaluation of species 
 Useful links:
 \itemize{
   \item \url{https://consbiol-unibern.github.io/SDMtune/}
-  \item \url{https://github.com/ConsBiol-unibern/SDMtune}
   \item Report bugs at \url{https://github.com/ConsBiol-unibern/SDMtune/issues}
 }
 
